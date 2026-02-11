@@ -1,8 +1,9 @@
 "use client";
 
 import Canvas from "@/components/Canvas";
-import PostCard from "@/components/PostCard";
+import PostCard, { PostCardRef } from "@/components/PostCard";
 import PostSetting from "@/components/PostSetting";
+import { useDraggable } from "@/hooks/useDraggable";
 import { useRef, useState } from "react";
 
 export default function PinPage() {
@@ -23,101 +24,76 @@ export default function PinPage() {
     },
   ]);
 
+  const [selected, setSelected] = useState<string | null>(null);
+
   const [position, setPosition] = useState({ x: 0, y: 0 }); // 캔버스 위치
   const [scale, setScale] = useState(1); // 확대 배율
 
-  const dragMode = useRef<"NONE" | "CANVAS" | "NOTE">("NONE");
+  const { initCanvasPosition, initPostPosition, stopDrag, calculateDragMove } =
+    useDraggable(scale);
 
-  const dragStart = useRef({
-    mouseX: 0,
-    mouseY: 0,
-    canvasX: 0, // 캔버스 원래 위치
-    canvasY: 0,
-    noteId: -1, // 드래그 중인 노트 ID
-    noteLeft: 0, // 노트 원래 위치 (CSS left)
-    noteTop: 0, // 노트 원래 위치 (CSS top)
-  });
+  const postsRef = useRef<Map<string, PostCardRef>>(new Map());
 
-  const postsRef = useRef<Map<number, HTMLElement>>(new Map());
-
-  const handleWheel = (e: React.WheelEvent) => {
+  const onZoom = (e: React.WheelEvent) => {
     e.preventDefault();
     const zoomDirection = e.deltaY > 0 ? -0.1 : 0.1;
     const newScale = Math.min(Math.max(scale + zoomDirection, 0.1), 5);
     setScale(newScale);
   };
 
-  const handleMouseDownCanvas = (e: React.MouseEvent) => {
-    // 배경을 눌렀을 때만 캔버스 이동 모드
-    dragMode.current = "CANVAS";
-    dragStart.current.mouseX = e.clientX;
-    dragStart.current.mouseY = e.clientY;
-    dragStart.current.canvasX = position.x;
-    dragStart.current.canvasY = position.y;
-  };
+  const onCanvasMouseDown = (e: React.MouseEvent) =>
+    initCanvasPosition(e, position);
 
-  const handleMouseDownNote = (e: React.MouseEvent, id: number) => {
+  const onPostMouseDown = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
 
     const target = postsRef.current.get(id);
     if (!target) return;
 
-    dragMode.current = "NOTE";
-    dragStart.current.noteId = id;
+    const currentPostPosition = target.getInitialPosition(e);
 
-    // 마우스 시작 위치
-    dragStart.current.mouseX = e.clientX;
-    dragStart.current.mouseY = e.clientY;
-
-    dragStart.current.noteLeft = target.offsetLeft;
-    dragStart.current.noteTop = target.offsetTop;
+    setSelected(id);
+    initPostPosition(e, id, currentPostPosition);
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (dragMode.current === "NONE") return;
+  const onMouseMove = (e: React.MouseEvent) => {
+    const movement = calculateDragMove(e);
+    if (!movement) return;
+    const { type, x, y } = movement;
 
     // A. 캔버스 이동 (Pan)
-    if (dragMode.current === "CANVAS") {
-      const deltaX = e.clientX - dragStart.current.mouseX;
-      const deltaY = e.clientY - dragStart.current.mouseY;
-
+    if (type === "CANVAS") {
       setPosition({
-        x: dragStart.current.canvasX + deltaX,
-        y: dragStart.current.canvasY + deltaY,
+        x,
+        y,
       });
     }
 
     // B. 노트 이동 (Move Note)
-    if (dragMode.current === "NOTE") {
-      const target = postsRef.current.get(dragStart.current.noteId);
+    if (type === "POST") {
+      const target = postsRef.current.get((e.target as HTMLElement).id);
       if (!target) return;
 
-      // 1. 마우스가 얼마나 움직였나?
-      const deltaX = e.clientX - dragStart.current.mouseX;
-      const deltaY = e.clientY - dragStart.current.mouseY;
-
-      // 2. (움직인 거리) / 스케일
-      const realMoveX = deltaX / scale;
-      const realMoveY = deltaY / scale;
-
-      // 3. 노트 위치 업데이트 (Ref를 통해 DOM 직접 수정 -> 성능 최적화)
-      target.style.left = `${dragStart.current.noteLeft + realMoveX}px`;
-      target.style.top = `${dragStart.current.noteTop + realMoveY}px`;
+      target.setPosition(x, y);
     }
   };
 
-  const handleMouseUp = () => {
-    dragMode.current = "NONE";
+  const onOutlineClick = (e: React.MouseEvent) => {
+    const target = postsRef.current.get((e.target as HTMLElement).id);
+    if (selected && !target) {
+      setSelected(null);
+    }
   };
 
   return (
     <section
-      className="w-screen h-screen overflow-hidden bg-[#333]"
-      onWheel={handleWheel}
-      onMouseDown={handleMouseDownCanvas}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
+      className="w-screen h-[95vh] overflow-hidden bg-[#333]"
+      onWheel={onZoom}
+      onMouseDown={onCanvasMouseDown}
+      onMouseMove={onMouseMove}
+      onMouseUp={stopDrag}
+      onMouseLeave={stopDrag}
+      onClick={onOutlineClick}
     >
       <PostSetting />
       <Canvas position={{ x: position.x, y: position.y }} scale={scale}>
@@ -125,10 +101,11 @@ export default function PinPage() {
           <PostCard
             {...post}
             key={post.id}
-            targetRef={(el) => {
-              if (el) postsRef.current.set(Number(post.id), el);
+            ref={(el) => {
+              if (el) postsRef.current.set(post.id, el);
             }}
-            handleMouseDown={(e) => handleMouseDownNote(e, Number(post.id))}
+            selected={post.id === selected ? true : false}
+            onMouseDown={(e) => onPostMouseDown(e, post.id)}
           />
         ))}
       </Canvas>
