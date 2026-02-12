@@ -46,7 +46,7 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
   return (
     <article
       id={id}
-      className={`w-60 h-60 absolute p-2 shadow-lg z-${zIndex} cursor-grab active:cursor-grabbing ${selected ? "outline-2 outline-blue-700" : ""}
+      className={`w-60 h-60 absolute p-2 shadow-lg cursor-grab active:cursor-grabbing ${selected ? "outline-2 outline-blue-700" : ""}
       `}
       // hover:outline-2 hover:outline-blue-600
       // 초기 위치 잡아주기 (예시로 겹치지 않게 id * 250)
@@ -54,6 +54,7 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
         left: 100 + Number(id) * 250,
         top: 100,
         background: color,
+        zIndex,
       }}
       ref={targetRef}
       onMouseDown={onMouseDown}
