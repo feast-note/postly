@@ -4,25 +4,48 @@ import Canvas from "@/components/Canvas";
 import PostCard, { PostCardRef } from "@/components/PostCard";
 import PostSetting from "@/components/PostSetting";
 import { useDraggable } from "@/hooks/useDraggable";
-import { useRef, useState } from "react";
+import { Post } from "@/service/post";
+import { useEffect, useRef, useState } from "react";
 
 export default function PinPage() {
-  const [posts, setPosts] = useState<
-    Array<{ id: string; title?: string; content?: string; zIndex: number }>
-  >([
-    {
-      id: "0",
-      title: "Zoom Test",
-      content: "확대해도 잘 움직이나요?",
-      zIndex: 1,
-    },
-    {
-      id: "1",
-      title: "배가 고픈가",
-      content: "재료는 파가 없어...",
-      zIndex: 0,
-    },
+  const [posts, setPosts] = useState<Array<Post>>([
+    // {
+    //   id: "0",
+    //   title: "Zoom Test",
+    //   content: "확대해도 잘 움직이나요?",
+    //   zIndex: 1,
+    //   color: "#50d71e",
+    // },
+    // {
+    //   id: "1",
+    //   title: "배가 고픈가",
+    //   content: "재료는 파가 없어...",
+    //   zIndex: 0,
+    //   color: "#ffd230",
+    // },
+    // {
+    //   id: "2",
+    //   title: "Zoom Test",
+    //   content: "확대해도 잘 움직이나요?",
+    //   zIndex: 1,
+    //   color: "#50d71e",
+    // },
+    // {
+    //   id: "3",
+    //   title: "배가 고픈가",
+    //   content: "재료는 파가 없어...",
+    //   zIndex: 0,
+    //   color: "#ffd230",
+    // },
   ]);
+  useEffect(() => {
+    fetch("/api/post")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("dat", data);
+        setPosts(data);
+      });
+  }, []);
 
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -45,19 +68,20 @@ export default function PinPage() {
     initCanvasPosition(e, position);
 
   const onPostMouseDown = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
+    e.preventDefault();
 
     const target = postsRef.current.get(id);
+
     if (!target) return;
 
     const currentPostPosition = target.getInitialPosition(e);
 
-    setSelected(id);
     initPostPosition(e, id, currentPostPosition);
   };
 
   const onMouseMove = (e: React.MouseEvent) => {
     const movement = calculateDragMove(e);
+
     if (!movement) return;
     const { type, x, y } = movement;
 
@@ -71,7 +95,8 @@ export default function PinPage() {
 
     // B. 노트 이동 (Move Note)
     if (type === "POST") {
-      const target = postsRef.current.get((e.target as HTMLElement).id);
+      const el = e.target as HTMLElement;
+      const target = postsRef.current.get(el.id || el.parentElement!.id);
       if (!target) return;
 
       target.setPosition(x, y);
@@ -79,10 +104,8 @@ export default function PinPage() {
   };
 
   const onOutlineClick = (e: React.MouseEvent) => {
-    const target = postsRef.current.get((e.target as HTMLElement).id);
-    if (selected && !target) {
-      setSelected(null);
-    }
+    const el = e.target as HTMLElement;
+    setSelected(el.id || el.parentElement!.id);
   };
 
   return (
@@ -95,7 +118,7 @@ export default function PinPage() {
       onMouseLeave={stopDrag}
       onClick={onOutlineClick}
     >
-      <PostSetting />
+      <PostSetting selected={posts.find((v) => v.id === selected) || null} />
       <Canvas position={{ x: position.x, y: position.y }} scale={scale}>
         {posts.map((post) => (
           <PostCard
