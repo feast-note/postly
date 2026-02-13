@@ -1,6 +1,6 @@
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import Img from "./Img";
-import { Post } from "@/service/post";
+import { Post } from "@/model/post";
 
 type Props = {
   selected?: boolean;
@@ -51,7 +51,7 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
       // hover:outline-2 hover:outline-blue-600
       // 초기 위치 잡아주기 (예시로 겹치지 않게 id * 250)
       style={{
-        left: 100 + Number(id) * 250,
+        left: 100 + Number(id || 0) * 250,
         top: 100,
         background: color,
         zIndex,
