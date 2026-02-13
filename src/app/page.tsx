@@ -9,10 +9,10 @@ export default function Home() {
       </h2>
       <div className="flex flex-col justify-center mt-4">
         <div className="flex gap-4 p-4">
-          <PostCardTemplate text="N" color="3680f9" />
-          <PostCardTemplate text="O" color="27ef8e" />
-          <PostCardTemplate text="T" color="ffd150" />
-          <PostCardTemplate text="E" color="c05ded" />
+          <PostCardTemplate text="N" color="#3680f9" />
+          <PostCardTemplate text="O" color="#27ef8e" />
+          <PostCardTemplate text="T" color="#ffd150" />
+          <PostCardTemplate text="E" color="#c05ded" />
         </div>
       </div>
       <Video
