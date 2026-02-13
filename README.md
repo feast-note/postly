@@ -9,5 +9,8 @@
     - **Sanity**를 활용하여 메모 데이터를 구조화하고, **Next-auth** 기반의 보안 인증 시스템을 구축하여 프론트엔드 외적 아키텍처 이해도 확장
 
 
- [![]](https://github.com/user-attachments/assets/7ac5b783-ba9c-4cc2-b361-d30ab884ad6b)
+
+
+
+[![]](https://github.com/user-attachments/assets/dcb125b6-d01e-46fb-b034-b404f9611de7)
 
