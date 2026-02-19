@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import AuthContext from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
+import QueryContext from "@/context/QueryContext";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -20,7 +21,9 @@ export default function RootLayout({
           <header className="w-full flex justify-center bg-gray-900">
             <Navbar />
           </header>
-          <main className="grow flex flex-col">{children}</main>
+          <main className="grow flex flex-col">
+            <QueryContext>{children}</QueryContext>
+          </main>
         </body>
       </AuthContext>
     </html>
