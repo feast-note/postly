@@ -3,7 +3,7 @@ import Video from "@/components/Video";
 
 export default function Home() {
   return (
-    <section className="flex items-center flex-col bg-gray-950">
+    <section className="flex items-center flex-col bg-gray-950 h-full">
       <h2 className="text-5xl mt-24 text-white">
         Infinite Canvas, Infinite Ideas
       </h2>
