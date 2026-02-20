@@ -47,31 +47,32 @@ export const useDraggable = (scale: number) => {
   };
 
   const calculateDragMove = (e: React.MouseEvent) => {
-    if (dragMode.current === "NONE") return null;
+    switch (dragMode.current) {
+      case "NONE":
+        return null;
+      case "CANVAS": {
+        const deltaX = e.clientX - dragStart.current.mouseX;
+        const deltaY = e.clientY - dragStart.current.mouseY;
 
-    if (dragMode.current === "CANVAS") {
-      const deltaX = e.clientX - dragStart.current.mouseX;
-      const deltaY = e.clientY - dragStart.current.mouseY;
+        return {
+          type: "CANVAS",
+          x: dragStart.current.canvasX + deltaX,
+          y: dragStart.current.canvasY + deltaY,
+        };
+      }
+      case "POST": {
+        const deltaX = e.clientX - dragStart.current.mouseX;
+        const deltaY = e.clientY - dragStart.current.mouseY;
 
-      return {
-        type: "CANVAS",
-        x: dragStart.current.canvasX + deltaX,
-        y: dragStart.current.canvasY + deltaY,
-      };
-    }
+        const realMoveX = deltaX / scale;
+        const realMoveY = deltaY / scale;
 
-    if (dragMode.current === "POST") {
-      const deltaX = e.clientX - dragStart.current.mouseX;
-      const deltaY = e.clientY - dragStart.current.mouseY;
-
-      const realMoveX = deltaX / scale;
-      const realMoveY = deltaY / scale;
-
-      return {
-        type: "POST",
-        x: dragStart.current.postLeft + realMoveX,
-        y: dragStart.current.postTop + realMoveY,
-      };
+        return {
+          type: "POST",
+          x: dragStart.current.postLeft + realMoveX,
+          y: dragStart.current.postTop + realMoveY,
+        };
+      }
     }
   };
 

@@ -1,68 +1,35 @@
 "use client";
 
 import { useDraggable } from "@/hooks/useDraggable";
-import { Post } from "@/service/post";
-import { useEffect, useRef, useState } from "react";
-import PostCard, { PostCardRef } from "./PostCard";
+import PostCard from "./PostCard";
 import PostSetting from "./PostSetting";
 import Canvas from "./Canvas";
+import { MdKeyboardArrowDown, MdOutlinePostAdd } from "react-icons/md";
+import { RxGroup } from "react-icons/rx";
+import { Post } from "@/model/post";
+import { useQuery } from "@tanstack/react-query";
+import { useScale } from "@/hooks/useScale";
+import { usePosition } from "@/hooks/usePosition";
+import { usePostcardInteraction } from "@/hooks/usePostcardInteraction";
 
 export default function Board() {
-  const [posts, setPosts] = useState<Array<Post>>([
-    // {
-    //   id: "0",
-    //   title: "Zoom Test",
-    //   content: "확대해도 잘 움직이나요?",
-    //   zIndex: 1,
-    //   color: "#50d71e",
-    // },
-    // {
-    //   id: "1",
-    //   title: "배가 고픈가",
-    //   content: "재료는 파가 없어...",
-    //   zIndex: 0,
-    //   color: "#ffd230",
-    // },
-    // {
-    //   id: "2",
-    //   title: "Zoom Test",
-    //   content: "확대해도 잘 움직이나요?",
-    //   zIndex: 1,
-    //   color: "#50d71e",
-    // },
-    // {
-    //   id: "3",
-    //   title: "배가 고픈가",
-    //   content: "재료는 파가 없어...",
-    //   zIndex: 0,
-    //   color: "#ffd230",
-    // },
-  ]);
-  useEffect(() => {
-    fetch("/api/post")
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("dat", data);
-        setPosts(data);
-      });
-  }, []);
+  const { data: posts } = useQuery<Array<Post>>({
+    queryKey: ["posts"],
+    queryFn: () =>
+      fetch("/api/post")
+        .then((res) => res.json())
+        .catch((error) => error),
+    refetchOnWindowFocus: true,
+  });
 
-  const [selected, setSelected] = useState<string | null>(null);
+  const { position, onPosition } = usePosition();
 
-  const [position, setPosition] = useState({ x: 0, y: 0 }); // 캔버스 위치
-  const [scale, setScale] = useState(1); // 확대 배율
-
+  const { scale, onScale } = useScale();
   const { initCanvasPosition, initPostPosition, stopDrag, calculateDragMove } =
     useDraggable(scale);
 
-  const postsRef = useRef<Map<string, PostCardRef>>(new Map());
-
-  const onZoom = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const zoomDirection = e.deltaY > 0 ? -0.1 : 0.1;
-    const newScale = Math.min(Math.max(scale + zoomDirection, 0.1), 5);
-    setScale(newScale);
-  };
+  const { onRef, selected, onSelect, getSelectedRef } =
+    usePostcardInteraction();
 
   const onCanvasMouseDown = (e: React.MouseEvent) =>
     initCanvasPosition(e, position);
@@ -70,63 +37,79 @@ export default function Board() {
   const onPostMouseDown = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
 
-    const target = postsRef.current.get(id);
-
-    if (!target) return;
-
-    const currentPostPosition = target.getInitialPosition(e);
+    const currentPostPosition = getSelectedRef(id)?.getInitialPosition(e) ?? {
+      offsetLeft: 0,
+      offsetTop: 0,
+    };
 
     initPostPosition(e, id, currentPostPosition);
+    onSelect(id);
   };
 
   const onMouseMove = (e: React.MouseEvent) => {
     const movement = calculateDragMove(e);
 
-    if (!movement) return;
-    const { type, x, y } = movement;
+    const { type, x, y } = movement ?? {};
 
     // A. 캔버스 이동 (Pan)
-    if (type === "CANVAS") {
-      setPosition({
-        x,
-        y,
-      });
-    }
+    if (type === "CANVAS") onPosition(x ?? 0, y ?? 0);
 
     // B. 노트 이동 (Move Note)
-    if (type === "POST") {
-      const el = e.target as HTMLElement;
-      const target = postsRef.current.get(el.id || el.parentElement!.id);
-      if (!target) return;
-
-      target.setPosition(x, y);
+    if (type === "POST" && selected) {
+      getSelectedRef(selected)?.setPosition(x ?? 0, y ?? 0);
     }
   };
 
   const onOutlineClick = (e: React.MouseEvent) => {
     const el = e.target as HTMLElement;
-    setSelected(el.id || el.parentElement!.id);
+    onSelect(el?.id ?? el?.parentElement?.id ?? null);
+  };
+
+  const onStop = (e: React.MouseEvent) => {
+    const movement = calculateDragMove(e);
+    const { type, x, y } = movement ?? {};
+
+    if (type === "POST" && selected) {
+      getSelectedRef(selected)?.setPosition(x ?? 0, y ?? 0);
+    }
+
+    stopDrag();
   };
 
   return (
     <section
-      className="w-screen h-[95vh] overflow-hidden bg-[#333]"
-      onWheel={onZoom}
+      className="w-screen h-full overflow-hidden bg-[#333]"
+      onWheel={onScale}
       onMouseDown={onCanvasMouseDown}
       onMouseMove={onMouseMove}
-      onMouseUp={stopDrag}
-      onMouseLeave={stopDrag}
+      onMouseUp={onStop}
+      onMouseLeave={onStop}
       onClick={onOutlineClick}
     >
-      <PostSetting selected={posts.find((v) => v.id === selected) || null} />
+      <PostSetting selected={posts?.find((v) => v.id === selected) || null} />
+      <menu className="absolute bottom-2 left-[48%] bg-slate-900 p-2 rounded-md z-100 flex gap-3">
+        <li>
+          <button className="flex items-center text-gray-300 border-[0.1px] p-1 rounded-sm border-gray-300 hover:bg-neutral-950">
+            <span>
+              <MdOutlinePostAdd size={17} />
+            </span>
+            <span>
+              <MdKeyboardArrowDown size={15} />
+            </span>
+          </button>
+        </li>
+        <li>
+          <button className="flex items-center text-gray-300 border-[0.1px] p-1 rounded-sm border-gray-300 hover:bg-neutral-950">
+            <RxGroup />
+          </button>
+        </li>
+      </menu>
       <Canvas position={{ x: position.x, y: position.y }} scale={scale}>
-        {posts.map((post) => (
+        {posts?.map((post) => (
           <PostCard
             {...post}
             key={post.id}
-            ref={(el) => {
-              if (el) postsRef.current.set(post.id, el);
-            }}
+            ref={onRef(post.id)}
             selected={post.id === selected ? true : false}
             onMouseDown={(e) => onPostMouseDown(e, post.id)}
           />
