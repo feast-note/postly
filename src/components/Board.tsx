@@ -4,13 +4,16 @@ import { useDraggable } from "@/hooks/useDraggable";
 import PostCard from "./PostCard";
 import PostSetting from "./PostSetting";
 import Canvas from "./Canvas";
-import { MdKeyboardArrowDown, MdOutlinePostAdd } from "react-icons/md";
-import { RxGroup } from "react-icons/rx";
 import { Post } from "@/model/post";
 import { useQuery } from "@tanstack/react-query";
 import { useScale } from "@/hooks/useScale";
 import { usePosition } from "@/hooks/usePosition";
 import { usePostcardInteraction } from "@/hooks/usePostcardInteraction";
+import ToolBar from "./ToolBar";
+import { useRef, useState } from "react";
+import AddPost from "./AddPost";
+
+export type Drag = "NONE" | "CANVAS" | "POST" | "CREATE";
 
 export default function Board() {
   const { data: posts } = useQuery<Array<Post>>({
@@ -22,42 +25,61 @@ export default function Board() {
     refetchOnWindowFocus: true,
   });
 
+  const [newPosts, setNewPosts] = useState<Array<Post>>([]);
+  const totalPosts = [...(posts || []), ...newPosts];
+
+  const grabPostArea = useRef<HTMLDivElement>(null);
+
   const { position, onPosition } = usePosition();
 
   const { scale, onScale } = useScale();
-  const { initCanvasPosition, initPostPosition, stopDrag, calculateDragMove } =
-    useDraggable(scale);
+  const dragMode = useRef<Drag>("NONE");
+
+  const { initPosition, calculateDragMove } = useDraggable(scale);
 
   const { onRef, selected, onSelect, getSelectedRef } =
     usePostcardInteraction();
 
-  const onCanvasMouseDown = (e: React.MouseEvent) =>
-    initCanvasPosition(e, position);
+  const onCanvasMouseDown = (e: React.MouseEvent) => {
+    if (dragMode.current === "CREATE") {
+      initPosition["CREATE"](e)(grabPostArea);
+    } else {
+      dragMode.current = "CANVAS";
+      initPosition["CANVAS"](e)(position);
+    }
+  };
 
   const onPostMouseDown = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
 
-    const currentPostPosition = getSelectedRef(id)?.getInitialPosition(e) ?? {
-      offsetLeft: 0,
-      offsetTop: 0,
+    dragMode.current = "POST";
+
+    const { offsetLeft, offsetTop } =
+      getSelectedRef(id)?.getInitialPosition(e) ?? {};
+
+    const currentPostPosition = {
+      x: offsetLeft ?? 0,
+      y: offsetTop ?? 0,
     };
 
-    initPostPosition(e, id, currentPostPosition);
+    initPosition["POST"](e)(currentPostPosition);
     onSelect(id);
   };
 
   const onMouseMove = (e: React.MouseEvent) => {
-    const movement = calculateDragMove(e);
+    const type = dragMode.current;
 
-    const { type, x, y } = movement ?? {};
-
-    // A. 캔버스 이동 (Pan)
-    if (type === "CANVAS") onPosition(x ?? 0, y ?? 0);
-
-    // B. 노트 이동 (Move Note)
-    if (type === "POST" && selected) {
-      getSelectedRef(selected)?.setPosition(x ?? 0, y ?? 0);
+    if (type === "CANVAS") {
+      const { x, y } = calculateDragMove["CANVAS"](e);
+      onPosition(x, y);
     }
+
+    if (type === "POST" && selected) {
+      const { x, y } = calculateDragMove["POST"](e);
+      getSelectedRef(selected)?.setPosition(x, y);
+    }
+
+    if (type === "CREATE") calculateDragMove["CREATE"](e)(grabPostArea);
   };
 
   const onOutlineClick = (e: React.MouseEvent) => {
@@ -66,19 +88,43 @@ export default function Board() {
   };
 
   const onStop = (e: React.MouseEvent) => {
-    const movement = calculateDragMove(e);
-    const { type, x, y } = movement ?? {};
+    const type = dragMode.current;
 
     if (type === "POST" && selected) {
-      getSelectedRef(selected)?.setPosition(x ?? 0, y ?? 0);
+      const { x, y } = calculateDragMove["POST"](e);
+      getSelectedRef(selected)?.setPosition(x, y);
     }
 
-    stopDrag();
+    if (type === "CREATE" && grabPostArea.current) {
+      const { left, top, width, height } =
+        grabPostArea.current.getBoundingClientRect();
+      setNewPosts((prev) =>
+        prev.concat([
+          {
+            id: String(newPosts.length - 1),
+            color: "red",
+            zIndex: 3,
+            width,
+            height,
+            position: { x: left, y: top },
+          },
+        ]),
+      );
+      onToggle(false);
+    }
+
+    dragMode.current = "NONE";
+  };
+
+  const [isAddMode, setIsAddMode] = useState(false);
+  const onToggle = (v: boolean) => {
+    setIsAddMode(v);
+    if (v) dragMode.current = "CREATE";
   };
 
   return (
     <section
-      className="w-screen h-full overflow-hidden bg-[#333]"
+      className={`w-screen h-full overflow-hidden bg-[#333] ${isAddMode ? "cursor-crosshair" : "cursor-default"}`}
       onWheel={onScale}
       onMouseDown={onCanvasMouseDown}
       onMouseMove={onMouseMove}
@@ -87,25 +133,11 @@ export default function Board() {
       onClick={onOutlineClick}
     >
       <PostSetting selected={posts?.find((v) => v.id === selected) || null} />
-      <menu className="absolute bottom-2 left-[48%] bg-slate-900 p-2 rounded-md z-100 flex gap-3">
-        <li>
-          <button className="flex items-center text-gray-300 border-[0.1px] p-1 rounded-sm border-gray-300 hover:bg-neutral-950">
-            <span>
-              <MdOutlinePostAdd size={17} />
-            </span>
-            <span>
-              <MdKeyboardArrowDown size={15} />
-            </span>
-          </button>
-        </li>
-        <li>
-          <button className="flex items-center text-gray-300 border-[0.1px] p-1 rounded-sm border-gray-300 hover:bg-neutral-950">
-            <RxGroup />
-          </button>
-        </li>
-      </menu>
-      <Canvas position={{ x: position.x, y: position.y }} scale={scale}>
-        {posts?.map((post) => (
+      <ToolBar>
+        <AddPost onToggle={onToggle} />
+      </ToolBar>
+      <Canvas position={position} scale={scale}>
+        {totalPosts?.map((post) => (
           <PostCard
             {...post}
             key={post.id}
@@ -114,6 +146,7 @@ export default function Board() {
             onMouseDown={(e) => onPostMouseDown(e, post.id)}
           />
         ))}
+        {isAddMode && <div ref={grabPostArea} className="absolute"></div>}
       </Canvas>
     </section>
   );

@@ -13,11 +13,23 @@ export type PostCardRef = {
     offsetLeft: number;
     offsetTop: number;
   };
-  setPosition: (left: number, top: number) => void;
+  setPosition: (x: number, y: number) => void;
 };
 
 const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
-  { id, zIndex, title, content, selected, color, onMouseDown, image }: Props,
+  {
+    id,
+    zIndex,
+    title,
+    content,
+    selected,
+    color,
+    onMouseDown,
+    image,
+    width,
+    height,
+    position,
+  }: Props,
   ref,
 ) {
   const targetRef = useRef<HTMLElement>(null);
@@ -34,10 +46,10 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
           offsetTop: el.offsetTop,
         };
       },
-      setPosition(left: number, top: number) {
+      setPosition(x: number, y: number) {
         const el = targetRef.current as unknown as HTMLElement;
-        el.style.left = left + "px";
-        el.style.top = top + "px";
+        el.style.left = x + "px";
+        el.style.top = y + "px";
       },
       node: targetRef.current,
     };
@@ -51,9 +63,11 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
       // hover:outline-2 hover:outline-blue-600
       // 초기 위치 잡아주기 (예시로 겹치지 않게 id * 250)
       style={{
-        left: 100 + Number(id || 0) * 250,
-        top: 100,
+        left: `${position?.x ?? 0}px`,
+        top: `${position?.y ?? 0}px`,
         background: color,
+        width: `${width ?? 240}px`,
+        height: `${height ?? 240}px`,
         zIndex,
       }}
       ref={targetRef}

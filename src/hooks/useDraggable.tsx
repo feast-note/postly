@@ -1,10 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { RefObject, useRef } from "react";
 
 export const useDraggable = (scale: number) => {
-  const dragMode = useRef<"NONE" | "CANVAS" | "POST">("NONE");
-
   const dragStart = useRef({
     mouseX: 0,
     mouseY: 0,
@@ -15,68 +13,62 @@ export const useDraggable = (scale: number) => {
     postTop: 0, // 노트 원래 위치 (CSS top)
   });
 
-  const initCanvasPosition = (
-    e: React.MouseEvent,
-    currentCanvasPosition: { x: number; y: number },
-  ) => {
-    dragMode.current = "CANVAS";
-    dragStart.current.mouseX = e.clientX;
-    dragStart.current.mouseY = e.clientY;
-    dragStart.current.canvasX = currentCanvasPosition.x;
-    dragStart.current.canvasY = currentCanvasPosition.y;
-  };
-
-  const initPostPosition = (
-    e: React.MouseEvent,
-    id: string,
-    currentPostPosition: {
-      offsetLeft: number;
-      offsetTop: number;
+  const initPosition = {
+    CANVAS: (e: React.MouseEvent) => (position: { x: number; y: number }) => {
+      dragStart.current.mouseX = e.clientX;
+      dragStart.current.mouseY = e.clientY;
+      dragStart.current.canvasX = position.x;
+      dragStart.current.canvasY = position.y;
     },
-  ) => {
-    dragMode.current = "POST";
-    dragStart.current.postId = id;
-
-    const { offsetLeft, offsetTop } = currentPostPosition;
-
-    dragStart.current.mouseX = e.clientX;
-    dragStart.current.mouseY = e.clientY;
-
-    dragStart.current.postLeft = offsetLeft;
-    dragStart.current.postTop = offsetTop;
+    POST: (e: React.MouseEvent) => (position: { x: number; y: number }) => {
+      dragStart.current.mouseX = e.clientX;
+      dragStart.current.mouseY = e.clientY;
+      dragStart.current.postLeft = position.x;
+      dragStart.current.postTop = position.y;
+    },
+    CREATE: (e: React.MouseEvent) => (el: RefObject<HTMLDivElement | null>) => {
+      if (!el.current) return;
+      el.current.style.left = e.clientX + "px";
+      el.current.style.top = e.clientY + "px";
+      el.current.style.width = "0px";
+      el.current.style.height = "0px";
+      el.current.style.border = "2px solid red";
+    },
   };
 
-  const calculateDragMove = (e: React.MouseEvent) => {
-    switch (dragMode.current) {
-      case "NONE":
-        return null;
-      case "CANVAS": {
-        const deltaX = e.clientX - dragStart.current.mouseX;
-        const deltaY = e.clientY - dragStart.current.mouseY;
+  const calculateDragMove = {
+    CANVAS: (e: React.MouseEvent) => {
+      const deltaX = e.clientX - dragStart.current.mouseX;
+      const deltaY = e.clientY - dragStart.current.mouseY;
 
-        return {
-          type: "CANVAS",
-          x: dragStart.current.canvasX + deltaX,
-          y: dragStart.current.canvasY + deltaY,
-        };
-      }
-      case "POST": {
-        const deltaX = e.clientX - dragStart.current.mouseX;
-        const deltaY = e.clientY - dragStart.current.mouseY;
+      return {
+        x: dragStart.current.canvasX + deltaX,
+        y: dragStart.current.canvasY + deltaY,
+      };
+    },
+    POST: (e: React.MouseEvent) => {
+      const deltaX = e.clientX - dragStart.current.mouseX;
+      const deltaY = e.clientY - dragStart.current.mouseY;
 
-        const realMoveX = deltaX / scale;
-        const realMoveY = deltaY / scale;
+      const realMoveX = deltaX / scale;
+      const realMoveY = deltaY / scale;
 
-        return {
-          type: "POST",
-          x: dragStart.current.postLeft + realMoveX,
-          y: dragStart.current.postTop + realMoveY,
-        };
-      }
-    }
+      return {
+        x: dragStart.current.postLeft + realMoveX,
+        y: dragStart.current.postTop + realMoveY,
+      };
+    },
+    CREATE: (e: React.MouseEvent) => (el: RefObject<HTMLDivElement | null>) => {
+      if (!el.current) return;
+      const { left, top } = el.current.getBoundingClientRect();
+
+      el.current.style.width = e.clientX - left + "px";
+      el.current.style.height = e.clientY - top + "px";
+    },
   };
 
-  const stopDrag = () => (dragMode.current = "NONE");
-
-  return { initCanvasPosition, initPostPosition, calculateDragMove, stopDrag };
+  return {
+    calculateDragMove,
+    initPosition,
+  };
 };
