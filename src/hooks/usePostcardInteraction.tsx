@@ -1,10 +1,9 @@
 "use client";
 
 import { PostCardRef } from "@/components/PostCard";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 
 export const usePostcardInteraction = () => {
-  const [selected, setSelected] = useState<string | null>(null);
   const postsRef = useRef<Map<string, PostCardRef>>(new Map());
 
   const onRef = (id: string) => (el: PostCardRef) => {
@@ -22,10 +21,8 @@ export const usePostcardInteraction = () => {
     move: (x: number, y: number) => (id: string) =>
       getSelectedRef(id)?.setPosition(x, y),
     init: (e: React.MouseEvent) => (id: string) =>
-      getSelectedRef(id)?.getInitialPosition(e),
+      getSelectedRef(id)?.getInitialPosition(e) ?? undefined,
   };
 
-  const onSelect = (id: string | null) => setSelected(id);
-
-  return { selected, onSelect, postApi };
+  return { postApi };
 };

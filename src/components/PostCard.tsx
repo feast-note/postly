@@ -9,10 +9,12 @@ type Props = {
 
 export type PostCardRef = {
   node: HTMLElement | null;
-  getInitialPosition: (e: React.MouseEvent<Element, MouseEvent>) => {
-    offsetLeft: number;
-    offsetTop: number;
-  };
+  getInitialPosition: (e: React.MouseEvent<Element, MouseEvent>) =>
+    | {
+        offsetLeft: number;
+        offsetTop: number;
+      }
+    | undefined;
   setPosition: (x: number, y: number) => void;
 };
 
