@@ -1,14 +1,11 @@
+import { useTransform } from "@/context/TransformContext";
 import { ReactNode } from "react";
 
 type Props = {
-  position: {
-    x: number;
-    y: number;
-  };
-  scale: number;
   children?: ReactNode;
 };
-export default function Canvas({ position, scale, children }: Props) {
+export default function Canvas({ children }: Props) {
+  const { position, scale } = useTransform();
   return (
     <div
       id="canvas"

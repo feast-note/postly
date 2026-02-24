@@ -4,22 +4,18 @@ import { Post } from "@/model/post";
 import { v4 as uuidv4 } from "uuid";
 import { useRef, useState } from "react";
 import { usePostcardInteraction } from "./usePostcardInteraction";
+import { useTransform } from "@/context/TransformContext";
+import { useAddMode } from "@/context/AddModeContext";
 
 export type Drag = "NONE" | "CANVAS" | "POST" | "CREATE";
 
-export const useBoadInteraction = (
-  posTools: {
-    position: { x: number; y: number };
-    onPosition: (x: number, y: number) => void;
-  },
-  scale: number,
-  onCreated?: (post: Post) => void,
-) => {
-  const { position, onPosition } = posTools;
+export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
+  const { scale, onScale, position, onPosition } = useTransform();
+
+  const { addActions } = useAddMode();
+
   const [selected, setSelected] = useState<string | null>(null);
   const onSelect = (id: string | null) => setSelected(id);
-
-  const target = useRef<HTMLDivElement>(null);
 
   const { postApi } = usePostcardInteraction();
 
@@ -35,13 +31,7 @@ export const useBoadInteraction = (
 
   const onCanvasMouseDown = (e: React.MouseEvent) => {
     if (dragMode.current === "CREATE") {
-      if (target.current === null) return;
-
-      target.current.style.left = e.clientX + "px";
-      target.current.style.top = e.clientY + "px";
-      target.current.style.width = "0px";
-      target.current.style.height = "0px";
-      target.current.style.border = "2px solid red";
+      addActions.init(e);
     } else {
       dragMode.current = "CANVAS";
       dragStart.current.mouseX = e.clientX;
@@ -92,11 +82,7 @@ export const useBoadInteraction = (
         }
         break;
       case "CREATE": {
-        if (!target.current) return;
-        const { left, top } = target.current.getBoundingClientRect();
-
-        target.current.style.width = e.clientX - left + "px";
-        target.current.style.height = e.clientY - top + "px";
+        addActions.move(e);
         break;
       }
     }
@@ -125,21 +111,17 @@ export const useBoadInteraction = (
     }
 
     if (type === "CREATE") {
-      if (!target.current) return;
-      const { left, top } = target.current.getBoundingClientRect();
+      addActions.move(e);
 
-      target.current.style.width = e.clientX - left + "px";
-      target.current.style.height = e.clientY - top + "px";
-
-      const { width, height } = target.current.getBoundingClientRect() ?? {};
+      const { width, height, left, top } = addActions?.getBounding() ?? {};
 
       createPost = {
         id: uuidv4(),
         color: "red",
         zIndex: 3,
-        width: width / scale,
-        height: height / scale,
-        position: { x: left, y: top },
+        width: (width ?? 0) / scale,
+        height: (height ?? 0) / scale,
+        position: { x: left ?? 0, y: top ?? 0 },
       };
       onCreated?.(createPost);
     }
@@ -151,13 +133,13 @@ export const useBoadInteraction = (
   return {
     selected,
     refRegister: postApi.register,
-    addModeRef: target,
     handlers: {
       onMouseDown: onCanvasMouseDown,
       onMouseMove,
       onClick: onOutlineClick,
       onMouseUp: onStop,
       onMouseLeave: onStop,
+      onwheel: onScale,
     },
     onDragMode,
     onPostMouseDown,
