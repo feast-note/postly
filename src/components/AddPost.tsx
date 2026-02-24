@@ -1,4 +1,6 @@
 "use client";
+import { useAddMode } from "@/context/AddModeContext";
+import { useDragMode } from "@/context/DragModeContext";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useState } from "react";
 import { BsCheck } from "react-icons/bs";
@@ -19,12 +21,10 @@ const addPostList = [
   },
 ];
 
-type Props = {
-  onToggle: (v: boolean) => void;
-};
-
-export default function AddPost({ onToggle }: Props) {
+export default function AddPost() {
   const { open, targetRef, onOpen } = useDropdown<HTMLDivElement>();
+  const { onAddMode } = useAddMode();
+  const { onDragMode } = useDragMode();
 
   const [postType, setPostType] = useState("simple-card");
 
@@ -43,7 +43,8 @@ export default function AddPost({ onToggle }: Props) {
                 onClick={() => {
                   setPostType(type);
                   onOpen(false);
-                  onToggle(true);
+                  onDragMode("CREATE");
+                  onAddMode(true);
                 }}
               >
                 <BsCheck

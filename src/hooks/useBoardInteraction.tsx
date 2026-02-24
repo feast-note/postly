@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import { usePostcardInteraction } from "./usePostcardInteraction";
 import { useTransform } from "@/context/TransformContext";
 import { useAddMode } from "@/context/AddModeContext";
+import { useDragMode } from "@/context/DragModeContext";
 
 export type Drag = "NONE" | "CANVAS" | "POST" | "CREATE";
 
@@ -19,7 +20,8 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
 
   const { postApi } = usePostcardInteraction();
 
-  const dragMode = useRef<Drag>("NONE");
+  const { dragMode, onDragMode } = useDragMode();
+
   const dragStart = useRef({
     mouseX: 0,
     mouseY: 0,
@@ -30,10 +32,10 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
   });
 
   const onCanvasMouseDown = (e: React.MouseEvent) => {
-    if (dragMode.current === "CREATE") {
+    if (dragMode() === "CREATE") {
       addActions.init(e);
     } else {
-      dragMode.current = "CANVAS";
+      onDragMode("CANVAS");
       dragStart.current.mouseX = e.clientX;
       dragStart.current.mouseY = e.clientY;
       dragStart.current.canvasX = position.x;
@@ -44,7 +46,7 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
   const onPostMouseDown = (id: string) => (e: React.MouseEvent) => {
     e.preventDefault();
 
-    dragMode.current = "POST";
+    onDragMode("POST");
 
     const { offsetLeft, offsetTop } = postApi.init(e)(id) ?? {};
 
@@ -56,8 +58,7 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
   };
 
   const onMouseMove = (e: React.MouseEvent) => {
-    const type = dragMode.current;
-    switch (type) {
+    switch (dragMode()) {
       case "CANVAS":
         const deltaX = e.clientX - dragStart.current.mouseX;
         const deltaY = e.clientY - dragStart.current.mouseY;
@@ -95,7 +96,7 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
 
   const onStop = (e: React.MouseEvent) => {
     let createPost: Post | null = null;
-    const type = dragMode.current;
+    const type = dragMode();
 
     if (type === "POST" && selected) {
       const deltaX = e.clientX - dragStart.current.mouseX;
@@ -125,10 +126,8 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
       };
       onCreated?.(createPost);
     }
-    dragMode.current = "NONE";
+    onDragMode("NONE");
   };
-
-  const onDragMode = (v: Drag) => (dragMode.current = v);
 
   return {
     selected,
@@ -141,7 +140,6 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
       onMouseLeave: onStop,
       onwheel: onScale,
     },
-    onDragMode,
     onPostMouseDown,
     onStop,
   };
