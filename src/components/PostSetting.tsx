@@ -1,10 +1,7 @@
-import { Post } from "@/service/post";
+import { useDragMode } from "@/context/DragModeContext";
 
-type Props = {
-  selected: Post | null;
-};
-
-export default function PostSetting({ selected }: Props) {
+export default function PostSetting() {
+  const { selected } = useDragMode();
   return (
     <menu className="absolute w-48 right-2 top-16  bg-white z-50 flex flex-col">
       {selected ? (

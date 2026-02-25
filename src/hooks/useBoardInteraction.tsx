@@ -2,7 +2,7 @@
 
 import { Post } from "@/model/post";
 import { v4 as uuidv4 } from "uuid";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { usePostcardInteraction } from "./usePostcardInteraction";
 import { useTransform } from "@/context/TransformContext";
 import { useAddMode } from "@/context/AddModeContext";
@@ -13,14 +13,11 @@ export type Drag = "NONE" | "CANVAS" | "POST" | "CREATE";
 export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
   const { scale, onScale, position, onPosition } = useTransform();
 
-  const { addActions } = useAddMode();
+  const { addActions, onAddMode } = useAddMode();
 
-  const [selected, setSelected] = useState<string | null>(null);
-  const onSelect = (id: string | null) => setSelected(id);
+  const { postRef } = usePostcardInteraction();
 
-  const { postApi } = usePostcardInteraction();
-
-  const { dragMode, onDragMode } = useDragMode();
+  const { dragMode, onDragMode, onSelect, selected } = useDragMode();
 
   const dragStart = useRef({
     mouseX: 0,
@@ -48,17 +45,19 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
 
     onDragMode("POST");
 
-    const { offsetLeft, offsetTop } = postApi.init(e)(id) ?? {};
+    const { offsetLeft, offsetTop } = postRef.init(e)(id) ?? {};
 
     dragStart.current.mouseX = e.clientX;
     dragStart.current.mouseY = e.clientY;
     dragStart.current.postLeft = offsetLeft ?? 0;
     dragStart.current.postTop = offsetTop ?? 0;
+
     onSelect(id);
   };
 
   const onMouseMove = (e: React.MouseEvent) => {
-    switch (dragMode()) {
+    const type = dragMode();
+    switch (type) {
       case "CANVAS":
         const deltaX = e.clientX - dragStart.current.mouseX;
         const deltaY = e.clientY - dragStart.current.mouseY;
@@ -76,7 +75,7 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
           const realMoveX = deltaX / scale;
           const realMoveY = deltaY / scale;
 
-          postApi.move(
+          postRef.move(
             dragStart.current.postLeft + realMoveX,
             dragStart.current.postTop + realMoveY,
           )(selected);
@@ -86,6 +85,10 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
         addActions.move(e);
         break;
       }
+      case "NONE":
+        break;
+      default:
+        throw new Error(`Unsupported drag mode : ${type}`);
     }
   };
 
@@ -105,7 +108,7 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
       const realMoveX = deltaX / scale;
       const realMoveY = deltaY / scale;
 
-      postApi.move(
+      postRef.move(
         dragStart.current.postLeft + realMoveX,
         dragStart.current.postTop + realMoveY,
       )(selected);
@@ -125,20 +128,20 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
         position: { x: left ?? 0, y: top ?? 0 },
       };
       onCreated?.(createPost);
+      onAddMode(false);
     }
     onDragMode("NONE");
   };
 
   return {
-    selected,
-    refRegister: postApi.register,
+    refRegister: postRef.register,
     handlers: {
       onMouseDown: onCanvasMouseDown,
       onMouseMove,
       onClick: onOutlineClick,
       onMouseUp: onStop,
       onMouseLeave: onStop,
-      onwheel: onScale,
+      onWheel: onScale,
     },
     onPostMouseDown,
     onStop,

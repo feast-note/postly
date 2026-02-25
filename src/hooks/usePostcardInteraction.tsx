@@ -16,7 +16,7 @@ export const usePostcardInteraction = () => {
 
   const getSelectedRef = (id: string) => postsRef.current.get(id);
 
-  const postApi = {
+  const postRef = {
     register: (id: string) => (el: PostCardRef) => onRef(id)(el),
     move: (x: number, y: number) => (id: string) =>
       getSelectedRef(id)?.setPosition(x, y),
@@ -24,5 +24,5 @@ export const usePostcardInteraction = () => {
       getSelectedRef(id)?.getInitialPosition(e) ?? undefined,
   };
 
-  return { postApi };
+  return { postRef };
 };
