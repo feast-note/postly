@@ -5,6 +5,12 @@ import { TransformProvider } from "@/context/TransformContext";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "studio",
+  description: "you can create post in this Postly studio",
+};
 
 export default async function PinPage() {
   const session = await getServerSession(authOptions);
