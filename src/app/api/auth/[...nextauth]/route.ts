@@ -2,6 +2,7 @@ import { addUser } from "@/service/user";
 import NextAuth, { AuthOptions } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
+import { SiLinuxprofessionalinstitute } from "react-icons/si";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -24,6 +25,22 @@ export const authOptions: AuthOptions = {
         name,
       });
       return true;
+    },
+    async session({ session, token }) {
+      const user = session?.user;
+
+      session.user = {
+        ...user,
+        id: token.id as string,
+      };
+
+      return session;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
     },
   },
 };
