@@ -1,11 +1,14 @@
-import { forwardRef, useImperativeHandle, useRef } from "react";
+"use client";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import Img from "./Img";
-import { Post } from "@/model/post";
+import { BoardPost } from "@/model/post";
+import { usePostPosition } from "@/context/PositionContext";
+import { CgClose } from "react-icons/cg";
 
 type Props = {
   selected?: boolean;
   onMouseDown: (e: React.MouseEvent<Element, MouseEvent>) => void;
-} & Post;
+} & BoardPost;
 
 export type PostCardRef = {
   node: HTMLElement | null;
@@ -22,7 +25,6 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
   {
     id,
     zIndex,
-    title,
     content,
     selected,
     color,
@@ -35,6 +37,7 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
   ref,
 ) {
   const targetRef = useRef<HTMLElement>(null);
+  const { updatePosition } = usePostPosition();
 
   useImperativeHandle(ref, () => {
     return {
@@ -52,34 +55,52 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
         const el = targetRef.current as unknown as HTMLElement;
         el.style.left = x + "px";
         el.style.top = y + "px";
+        updatePosition(id, x, y);
       },
       node: targetRef.current,
     };
-  }, [targetRef]);
+  }, [id, updatePosition]);
 
+  const [contentInput, setContentInput] = useState(content ?? "");
   return (
     <article
       id={id}
-      className={`w-60 h-60 absolute p-2 shadow-lg cursor-grab active:cursor-grabbing ${selected ? "outline-2 outline-blue-700" : ""}
+      className={`flex flex-col rounded-md absolute shadow-lg cursor-grab active:cursor-grabbing ${selected ? "outline-2 outline-blue-700" : ""}
       `}
-      // hover:outline-2 hover:outline-blue-600
-      // 초기 위치 잡아주기 (예시로 겹치지 않게 id * 250)
       style={{
         left: `${position?.x ?? 0}px`,
         top: `${position?.y ?? 0}px`,
         background: color,
         width: `${width ?? 240}px`,
-        height: `${height ?? 240}px`,
+        minHeight: `${height ?? 240}px`,
+        height: `auto`,
         zIndex,
       }}
       ref={targetRef}
       onMouseDown={onMouseDown}
     >
-      <h2 className="font-bold text-2xl text-center overflow-hidden text-ellipsis select-none">
-        {title}
-      </h2>
-      {image && <Img image={image} />}
-      <p className="w-full overflow-auto mt-2 select-none">{content}</p>
+      <div className="text-right p-2">
+        <button className="w-4 h-4 rounded-full bg-red-500 hover:point-cursor hover:bg-red-700">
+          <CgClose />
+        </button>
+      </div>
+      <div className="p-2 flex-1 flex flex-col">
+        {image && <Img image={image} />}
+        <textarea
+          className="w-full flex-1 mt-2 resize-none select-auto"
+          name="content"
+          value={contentInput}
+          placeholder="Enter content here"
+          onChange={(e) => {
+            e.stopPropagation();
+            console.log("content change : ", e.currentTarget.value);
+            setContentInput(e.currentTarget.value);
+          }}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
+        />
+      </div>
     </article>
   );
 });

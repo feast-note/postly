@@ -1,11 +1,9 @@
 import Board from "@/components/Board";
-import { AddModeProvider } from "@/context/AddModeContext";
-import { DragModeProvider } from "@/context/DragModeContext";
-import { TransformProvider } from "@/context/TransformContext";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
+import BoardStateProvider from "@/components/BoardStateProvider";
 
 export const metadata: Metadata = {
   title: "studio",
@@ -19,12 +17,8 @@ export default async function PinPage() {
   if (!user) redirect("/");
 
   return (
-    <TransformProvider>
-      <DragModeProvider>
-        <AddModeProvider>
-          <Board />
-        </AddModeProvider>
-      </DragModeProvider>
-    </TransformProvider>
+    <BoardStateProvider>
+      <Board />
+    </BoardStateProvider>
   );
 }

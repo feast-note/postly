@@ -1,12 +1,13 @@
 "use client";
-
-import { Post } from "@/model/post";
 import { v4 as uuidv4 } from "uuid";
 import { useRef } from "react";
 import { usePostcardInteraction } from "./usePostcardInteraction";
 import { useTransform } from "@/context/TransformContext";
 import { useAddMode } from "@/context/AddModeContext";
 import { useDragMode } from "@/context/DragModeContext";
+import { usePostData } from "./usePostData";
+import { usePostPosition } from "@/context/PositionContext";
+import { Post } from "@/model/post";
 
 export type Drag = "NONE" | "CANVAS" | "POST" | "CREATE";
 
@@ -19,6 +20,9 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
 
   const { dragMode, onDragMode, onSelect, selected } = useDragMode();
 
+  const { postPost } = usePostData();
+  const { updatePosition } = usePostPosition();
+
   const dragStart = useRef({
     mouseX: 0,
     mouseY: 0,
@@ -30,7 +34,11 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
 
   const onCanvasMouseDown = (e: React.MouseEvent) => {
     if (dragMode() === "CREATE") {
-      addActions.init(e);
+      dragStart.current.mouseX = e.clientX;
+      dragStart.current.mouseY = e.clientY;
+      dragStart.current.canvasX = position.x;
+      dragStart.current.canvasY = position.y;
+      addActions.init(e, position, scale);
     } else {
       onDragMode("CANVAS");
       dragStart.current.mouseX = e.clientX;
@@ -41,7 +49,7 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
   };
 
   const onPostMouseDown = (id: string) => (e: React.MouseEvent) => {
-    e.preventDefault();
+    e.stopPropagation();
 
     onDragMode("POST");
 
@@ -82,7 +90,7 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
         }
         break;
       case "CREATE": {
-        addActions.move(e);
+        addActions.move(e, position, scale);
         break;
       }
       case "NONE":
@@ -93,12 +101,31 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
   };
 
   const onOutlineClick = (e: React.MouseEvent) => {
-    const el = e.target as HTMLElement;
-    onSelect(el?.id ?? el?.parentElement?.id ?? null);
+    const type = dragMode();
+    console.log("type", type);
+    switch (type) {
+      case "POST": {
+        if (!selected) {
+          const el = e.target as HTMLElement;
+          onSelect(el?.id ?? el?.parentElement?.id);
+        }
+      }
+
+      case "CANVAS":
+        onSelect(null);
+        break;
+      case "CREATE":
+        break;
+      case "NONE":
+        if (e.target === e.currentTarget) onSelect(null);
+        onSelect(null);
+        break;
+      default:
+        throw new Error(`Unsupported drag mode : ${type}`);
+    }
   };
 
   const onStop = (e: React.MouseEvent) => {
-    let createPost: Post | null = null;
     const type = dragMode();
 
     if (type === "POST" && selected) {
@@ -115,19 +142,23 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
     }
 
     if (type === "CREATE") {
-      addActions.move(e);
+      addActions.move(e, position, scale);
 
-      const { width, height, left, top } = addActions?.getBounding() ?? {};
+      const { width, height, left, top } = addActions.getBounding() ?? {};
 
-      createPost = {
-        id: uuidv4(),
-        color: "red",
-        zIndex: 3,
+      const newPost = {
+        color: "yellow",
+        zIndex: 1,
         width: (width ?? 0) / scale,
         height: (height ?? 0) / scale,
-        position: { x: left ?? 0, y: top ?? 0 },
+        position: {
+          x: (left ?? 0) / scale + position.x,
+          y: (top ?? 0) / scale + position.y,
+        },
       };
-      onCreated?.(createPost);
+      if (!newPost) return;
+      postPost.mutate(newPost);
+      // onCreated?.(newPost);
       onAddMode(false);
     }
     onDragMode("NONE");

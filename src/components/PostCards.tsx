@@ -1,14 +1,17 @@
 import { Post } from "@/model/post";
 import PostCard, { PostCardRef } from "./PostCard";
 import { useDragMode } from "@/context/DragModeContext";
+import { usePostPosition } from "@/context/PositionContext";
 
 type Props = {
-  posts: Array<Post>;
+  posts?: Array<Post>;
   register: (id: string) => (el: PostCardRef) => void;
   onMouseDown: (id: string) => (e: React.MouseEvent) => void;
 };
 export default function PostCards({ posts, register, onMouseDown }: Props) {
   const { selected } = useDragMode();
+  const { positions } = usePostPosition();
+  console.log("업데이트", positions);
   return (
     <>
       {posts?.map((post) => (
@@ -18,6 +21,7 @@ export default function PostCards({ posts, register, onMouseDown }: Props) {
           ref={register(post.id)}
           selected={post.id === selected ? true : false}
           onMouseDown={onMouseDown(post.id)}
+          position={positions?.[post.id]}
         />
       ))}
     </>

@@ -10,7 +10,7 @@ import { useAddMode } from "@/context/AddModeContext";
 import AddPostMode from "./AddPostMode";
 
 export default function Board() {
-  const { totalPosts, setNewPosts } = usePostData();
+  const { posts, setNewPosts } = usePostData();
 
   const { isAddMode } = useAddMode();
 
@@ -30,7 +30,7 @@ export default function Board() {
       <ToolBar />
       <Canvas>
         <PostCards
-          posts={totalPosts}
+          posts={posts}
           register={refRegister}
           onMouseDown={onPostMouseDown}
         />
