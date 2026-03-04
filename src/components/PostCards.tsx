@@ -11,7 +11,7 @@ type Props = {
 export default function PostCards({ posts, register, onMouseDown }: Props) {
   const { selected } = useDragMode();
   const { positions } = usePostPosition();
-  console.log("업데이트", positions);
+
   return (
     <>
       {posts?.map((post) => (

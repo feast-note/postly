@@ -25,7 +25,6 @@ export async function POST(request: Request) {
 
   const { post } = await request.json();
 
-  console.log("post", post);
   const { width, height } = post as Post;
 
   return createPost({

@@ -102,7 +102,7 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
 
   const onOutlineClick = (e: React.MouseEvent) => {
     const type = dragMode();
-    console.log("type", type);
+
     switch (type) {
       case "POST": {
         if (!selected) {

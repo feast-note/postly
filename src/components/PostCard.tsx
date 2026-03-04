@@ -93,7 +93,7 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
           placeholder="Enter content here"
           onChange={(e) => {
             e.stopPropagation();
-            console.log("content change : ", e.currentTarget.value);
+
             setContentInput(e.currentTarget.value);
           }}
           onMouseDown={(e) => {

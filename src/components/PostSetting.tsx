@@ -2,7 +2,7 @@ import { useDragMode } from "@/context/DragModeContext";
 
 export default function PostSetting() {
   const { selected } = useDragMode();
-  console.log("selected", selected);
+
   return (
     <menu className="absolute w-48 right-2 top-16  bg-white z-50 flex flex-col">
       {selected ? (
