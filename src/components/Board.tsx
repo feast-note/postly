@@ -10,16 +10,15 @@ import { useAddMode } from "@/context/AddModeContext";
 import AddPostMode from "./AddPostMode";
 
 export default function Board() {
-  const { posts, setNewPosts } = usePostData();
+  const { posts } = usePostData();
 
   const { isAddMode } = useAddMode();
 
-  const { refRegister, handlers, onPostMouseDown } = useBoadInteraction(
-    (post) => {
-      // 추후 없어질 로직 -> update sanity를 통해서 이루어질 예정
-      setNewPosts((prev) => prev.concat([post]));
-    },
-  );
+  const { refRegister, handlers, onPostMouseDown } = useBoadInteraction();
+  // (post) => {
+  //   // 추후 없어질 로직 -> update sanity를 통해서 이루어질 예정
+  //   setNewPosts((prev) => prev.concat([post]));
+  // },
 
   return (
     <section

@@ -21,7 +21,7 @@ export default function PostCards({ posts, register, onMouseDown }: Props) {
           ref={register(post.id)}
           selected={post.id === selected ? true : false}
           onMouseDown={onMouseDown(post.id)}
-          position={positions?.[post.id]}
+          position={positions?.[post.id] ?? { x: 0, y: 0 }}
         />
       ))}
     </>

@@ -14,8 +14,10 @@ type PostPositionRecord = Record<string, { x: number; y: number }>;
 const PositionContext = createContext<{
   positions?: PostPositionRecord;
   updatePosition: (id: string, x: number, y: number) => void;
+  removePosition: (id: string) => void;
 }>({
   updatePosition: () => () => {},
+  removePosition: () => {},
 });
 
 type Props = {
@@ -44,6 +46,15 @@ export function PositionProvider({ children }: Props) {
     [saveTrigger],
   );
 
+  const removePosition = useCallback(
+    (id: string) =>
+      setPositions((prev) => {
+        const { [id]: _, ...rest } = prev;
+        return rest;
+      }),
+    [],
+  );
+
   // 디바운스된 실제 로컬스토리지 저장
   useDebouncedEffect(() => {
     if (!saveTrigger) return;
@@ -52,7 +63,9 @@ export function PositionProvider({ children }: Props) {
   }, 100);
 
   return (
-    <PositionContext.Provider value={{ positions, updatePosition }}>
+    <PositionContext.Provider
+      value={{ positions, updatePosition, removePosition }}
+    >
       {children}
     </PositionContext.Provider>
   );

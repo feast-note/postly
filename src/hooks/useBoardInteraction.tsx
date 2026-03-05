@@ -6,12 +6,10 @@ import { useTransform } from "@/context/TransformContext";
 import { useAddMode } from "@/context/AddModeContext";
 import { useDragMode } from "@/context/DragModeContext";
 import { usePostData } from "./usePostData";
-import { usePostPosition } from "@/context/PositionContext";
-import { Post } from "@/model/post";
 
 export type Drag = "NONE" | "CANVAS" | "POST" | "CREATE";
 
-export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
+export const useBoadInteraction = () => {
   const { scale, onScale, position, onPosition } = useTransform();
 
   const { addActions, onAddMode } = useAddMode();
@@ -20,8 +18,7 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
 
   const { dragMode, onDragMode, onSelect, selected } = useDragMode();
 
-  const { postPost } = usePostData();
-  const { updatePosition } = usePostPosition();
+  const { addPostItem } = usePostData();
 
   const dragStart = useRef({
     mouseX: 0,
@@ -157,7 +154,7 @@ export const useBoadInteraction = (onCreated?: (post: Post) => void) => {
         },
       };
       if (!newPost) return;
-      postPost.mutate(newPost);
+      addPostItem.mutate(newPost);
       // onCreated?.(newPost);
       onAddMode(false);
     }
