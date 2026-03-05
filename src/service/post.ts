@@ -44,3 +44,14 @@ export async function createPost({
       return res._id;
     });
 }
+
+export async function modifyPost(id: string, post: Partial<Omit<Post, "id">>) {
+  return client
+    .patch(id)
+    .set({ ...post })
+    .commit({ autoGenerateArrayKeys: true });
+}
+
+export async function deletePost(id: string) {
+  return client.delete(id);
+}

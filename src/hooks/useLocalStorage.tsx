@@ -12,7 +12,6 @@ export const useLocalStorage = <T,>(key: string, initialValue?: T) => {
     }
   });
 
-  // 2. 값을 저장하는 함수
   const setValue = useCallback(
     (value: T | ((val: T) => T)) => {
       setStoredValue((prev) => {
