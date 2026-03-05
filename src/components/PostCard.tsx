@@ -1,9 +1,11 @@
 "use client";
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, useImperativeHandle, useRef } from "react";
 import Img from "./Img";
 import { BoardPost } from "@/model/post";
 import { usePostPosition } from "@/context/PositionContext";
 import { CgClose } from "react-icons/cg";
+import PostContentForm from "./PostContentForm";
+import CloseButton from "./CloseButton";
 
 type Props = {
   selected?: boolean;
@@ -61,48 +63,48 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
     };
   }, [id, updatePosition]);
 
-  const [contentInput, setContentInput] = useState(content ?? "");
   return (
     <article
       id={id}
-      className={`flex flex-col rounded-md absolute shadow-lg cursor-grab active:cursor-grabbing ${selected ? "outline-2 outline-blue-700" : ""}
-      `}
-      style={{
-        left: `${position?.x ?? 0}px`,
-        top: `${position?.y ?? 0}px`,
-        background: color,
-        width: `${width ?? 240}px`,
-        minHeight: `${height ?? 240}px`,
-        height: `auto`,
-        zIndex,
-      }}
+      className={getBasicStyle(selected ?? false)}
+      style={getPostCardStyle({ position, color, width, height, zIndex })}
       ref={targetRef}
       onMouseDown={onMouseDown}
     >
       <div className="text-right p-2">
-        <button className="w-4 h-4 rounded-full bg-red-500 hover:point-cursor hover:bg-red-700">
-          <CgClose />
-        </button>
+        <CloseButton id={id} />
       </div>
       <div className="p-2 flex-1 flex flex-col">
         {image && <Img image={image} />}
-        <textarea
-          className="w-full flex-1 mt-2 resize-none select-auto"
-          name="content"
-          value={contentInput}
-          placeholder="Enter content here"
-          onChange={(e) => {
-            e.stopPropagation();
-
-            setContentInput(e.currentTarget.value);
-          }}
-          onMouseDown={(e) => {
-            e.stopPropagation();
-          }}
-        />
+        <PostContentForm id={id} content={content} />
       </div>
     </article>
   );
 });
 
 export default PostCard;
+
+function getBasicStyle(selected: boolean) {
+  const selectStyle = selected ? "outline-2 outline-blue-700" : "";
+  return `flex flex-col rounded-md absolute shadow-lg cursor-grab active:cursor-grabbing ${selectStyle}`;
+}
+
+function getPostCardStyle({
+  position,
+  color,
+  width,
+  height,
+  zIndex,
+}: Partial<
+  Pick<BoardPost, "color" | "position" | "width" | "height" | "zIndex">
+>) {
+  return {
+    left: `${position?.x ?? 0}px`,
+    top: `${position?.y ?? 0}px`,
+    background: color,
+    width: `${width ?? 240}px`,
+    minHeight: `${height ?? 240}px`,
+    height: `auto`,
+    zIndex,
+  };
+}
