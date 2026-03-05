@@ -13,6 +13,10 @@ export type Position = {
   y: number;
 };
 
-export type BoardPost = Omit<Post, "id"> & {
+export type BoardPost = Post & {
+  position: Position;
+};
+
+export type CreatePost = Omit<Post, "id"> & {
   position: Position;
 };
