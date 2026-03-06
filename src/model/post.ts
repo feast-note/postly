@@ -14,9 +14,5 @@ export type Position = {
 };
 
 export type BoardPost = Post & {
-  position: Position;
-};
-
-export type CreatePost = Omit<Post, "id"> & {
-  position: Position;
+  position?: Position;
 };

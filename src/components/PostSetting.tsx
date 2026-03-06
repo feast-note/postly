@@ -1,7 +1,7 @@
-import { useDragMode } from "@/context/DragModeContext";
+import { useSelect } from "@/context/SelectContext";
 
 export default function PostSetting() {
-  const { selected } = useDragMode();
+  const { selected } = useSelect();
 
   return (
     <menu className="absolute w-48 right-2 top-16  bg-white z-50 flex flex-col">

@@ -1,14 +1,15 @@
 "use client";
-import { useAddMode } from "@/context/AddModeContext";
-import { useDragMode } from "@/context/DragModeContext";
 import { useDropdown } from "@/hooks/useDropdown";
-import { useState } from "react";
+import { usePostData } from "@/hooks/usePostData";
+import { ReactNode, useState } from "react";
 import { BsCheck } from "react-icons/bs";
 import { FcEditImage } from "react-icons/fc";
 import { IoSquare } from "react-icons/io5";
 import { MdKeyboardArrowDown, MdOutlinePostAdd } from "react-icons/md";
 
-const addPostList = [
+type PostType = "simple-card" | "image-card";
+
+const addPostList: Array<{ icon: ReactNode; title: string; type: PostType }> = [
   {
     icon: <IoSquare size={20} color={"yellow"} />,
     title: "simple card",
@@ -23,10 +24,15 @@ const addPostList = [
 
 export default function AddPost() {
   const { open, targetRef, onOpen } = useDropdown<HTMLDivElement>();
-  const { onAddMode } = useAddMode();
-  const { onDragMode } = useDragMode();
+  const { addPostItem } = usePostData();
 
-  const [postType, setPostType] = useState("simple-card");
+  const [postType, setPostType] = useState<PostType>("simple-card");
+
+  const handleAddPost = (type: PostType) => () => {
+    setPostType(type);
+    onOpen(false);
+    addPostItem.mutate();
+  };
 
   return (
     <>
@@ -40,12 +46,7 @@ export default function AddPost() {
               <li
                 className="text-sm w-full flex text-center gap-2 p-1 hover:bg-blue-300 rounded-md"
                 key={title}
-                onClick={() => {
-                  setPostType(type);
-                  onOpen(false);
-                  onDragMode("CREATE");
-                  onAddMode(true);
-                }}
+                onClick={handleAddPost(type)}
               >
                 <BsCheck
                   size={20}

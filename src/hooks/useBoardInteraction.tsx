@@ -1,24 +1,19 @@
 "use client";
-import { v4 as uuidv4 } from "uuid";
+
 import { useRef } from "react";
 import { usePostcardInteraction } from "./usePostcardInteraction";
 import { useTransform } from "@/context/TransformContext";
-import { useAddMode } from "@/context/AddModeContext";
-import { useDragMode } from "@/context/DragModeContext";
-import { usePostData } from "./usePostData";
+import { useDragMode } from "@/hooks/useDragMode";
+import { useSelect } from "@/context/SelectContext";
 
-export type Drag = "NONE" | "CANVAS" | "POST" | "CREATE";
+export type Drag = "NONE" | "CANVAS" | "POST";
 
 export const useBoadInteraction = () => {
   const { scale, onScale, position, onPosition } = useTransform();
 
-  const { addActions, onAddMode } = useAddMode();
-
   const { postRef } = usePostcardInteraction();
-
-  const { dragMode, onDragMode, onSelect, selected } = useDragMode();
-
-  const { addPostItem } = usePostData();
+  const { selected, onSelect } = useSelect();
+  const { dragMode, onDragMode } = useDragMode();
 
   const dragStart = useRef({
     mouseX: 0,
@@ -30,25 +25,17 @@ export const useBoadInteraction = () => {
   });
 
   const onCanvasMouseDown = (e: React.MouseEvent) => {
-    if (dragMode() === "CREATE") {
-      dragStart.current.mouseX = e.clientX;
-      dragStart.current.mouseY = e.clientY;
-      dragStart.current.canvasX = position.x;
-      dragStart.current.canvasY = position.y;
-      addActions.init(e, position, scale);
-    } else {
-      onDragMode("CANVAS");
-      dragStart.current.mouseX = e.clientX;
-      dragStart.current.mouseY = e.clientY;
-      dragStart.current.canvasX = position.x;
-      dragStart.current.canvasY = position.y;
-    }
+    onDragMode("CANVAS");
+    dragStart.current.mouseX = e.clientX;
+    dragStart.current.mouseY = e.clientY;
+    dragStart.current.canvasX = position.x;
+    dragStart.current.canvasY = position.y;
   };
 
   const onPostMouseDown = (id: string) => (e: React.MouseEvent) => {
     e.stopPropagation();
-
     onDragMode("POST");
+    onSelect(id);
 
     const { offsetLeft, offsetTop } = postRef.init(e)(id) ?? {};
 
@@ -56,8 +43,6 @@ export const useBoadInteraction = () => {
     dragStart.current.mouseY = e.clientY;
     dragStart.current.postLeft = offsetLeft ?? 0;
     dragStart.current.postTop = offsetTop ?? 0;
-
-    onSelect(id);
   };
 
   const onMouseMove = (e: React.MouseEvent) => {
@@ -86,10 +71,6 @@ export const useBoadInteraction = () => {
           )(selected);
         }
         break;
-      case "CREATE": {
-        addActions.move(e, position, scale);
-        break;
-      }
       case "NONE":
         break;
       default:
@@ -107,11 +88,8 @@ export const useBoadInteraction = () => {
           onSelect(el?.id ?? el?.parentElement?.id);
         }
       }
-
       case "CANVAS":
         onSelect(null);
-        break;
-      case "CREATE":
         break;
       case "NONE":
         if (e.target === e.currentTarget) onSelect(null);
@@ -138,26 +116,6 @@ export const useBoadInteraction = () => {
       )(selected);
     }
 
-    if (type === "CREATE") {
-      addActions.move(e, position, scale);
-
-      const { width, height, left, top } = addActions.getBounding() ?? {};
-
-      const newPost = {
-        color: "yellow",
-        zIndex: 1,
-        width: (width ?? 0) / scale,
-        height: (height ?? 0) / scale,
-        position: {
-          x: (left ?? 0) / scale + position.x,
-          y: (top ?? 0) / scale + position.y,
-        },
-      };
-      if (!newPost) return;
-      addPostItem.mutate(newPost);
-      // onCreated?.(newPost);
-      onAddMode(false);
-    }
     onDragMode("NONE");
   };
 

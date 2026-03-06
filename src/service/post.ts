@@ -27,7 +27,7 @@ export async function createPost({
   userId: string;
   width?: number;
   height?: number;
-}): Promise<string> {
+}): Promise<Post> {
   return client
     .create({
       _type: "post",
@@ -41,7 +41,7 @@ export async function createPost({
       },
     })
     .then((res) => {
-      return res._id;
+      return { ...res, id: res._id };
     });
 }
 

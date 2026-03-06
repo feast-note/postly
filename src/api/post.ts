@@ -1,12 +1,16 @@
-import { CreatePost } from "@/model/post";
+import { Post } from "@/model/post";
+import { getPostsByUsername } from "@/service/post";
 
+export async function getInitialPosts(username: string) {
+  return getPostsByUsername(username).then((res) => res);
+}
 export async function getPosts() {
   return fetch("/api/post")
     .then((res) => res.json())
     .catch((error) => error);
 }
 
-export async function addPost(post: CreatePost): Promise<string> {
+export async function addPost(): Promise<Post> {
   return fetch("/api/post", {
     method: "post",
     headers: {
@@ -14,10 +18,10 @@ export async function addPost(post: CreatePost): Promise<string> {
     },
     body: JSON.stringify({
       post: {
-        width: post.width,
-        height: post.height,
-        color: post.color,
-        zIndex: post.zIndex,
+        width: 240,
+        height: 240,
+        color: "rgb(255, 210, 48)",
+        zIndex: 1,
       },
     }),
   }).then((res) => res.json());

@@ -3,7 +3,6 @@ import { forwardRef, useImperativeHandle, useRef } from "react";
 import Img from "./Img";
 import { BoardPost } from "@/model/post";
 import { usePostPosition } from "@/context/PositionContext";
-import { CgClose } from "react-icons/cg";
 import PostContentForm from "./PostContentForm";
 import CloseButton from "./CloseButton";
 
@@ -67,7 +66,13 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
     <article
       id={id}
       className={getBasicStyle(selected ?? false)}
-      style={getPostCardStyle({ position, color, width, height, zIndex })}
+      style={getPostCardStyle({
+        position,
+        color,
+        width,
+        height,
+        zIndex,
+      })}
       ref={targetRef}
       onMouseDown={onMouseDown}
     >
@@ -86,6 +91,7 @@ export default PostCard;
 
 function getBasicStyle(selected: boolean) {
   const selectStyle = selected ? "outline-2 outline-blue-700" : "";
+
   return `flex flex-col rounded-md absolute shadow-lg cursor-grab active:cursor-grabbing ${selectStyle}`;
 }
 
