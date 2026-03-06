@@ -5,9 +5,9 @@ import { BoardPost } from "@/model/post";
 import { usePostPosition } from "@/context/PositionContext";
 import PostContentForm from "./PostContentForm";
 import CloseButton from "./CloseButton";
+import { useSelect } from "@/context/SelectContext";
 
 type Props = {
-  selected?: boolean;
   onMouseDown: (e: React.MouseEvent<Element, MouseEvent>) => void;
 } & BoardPost;
 
@@ -27,7 +27,6 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
     id,
     zIndex,
     content,
-    selected,
     color,
     onMouseDown,
     image,
@@ -39,6 +38,7 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
 ) {
   const targetRef = useRef<HTMLElement>(null);
   const { updatePosition } = usePostPosition();
+  const { selected } = useSelect();
 
   useImperativeHandle(ref, () => {
     return {
@@ -65,7 +65,7 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
   return (
     <article
       id={id}
-      className={getBasicStyle(selected ?? false)}
+      className={getBasicStyle(selected === id ? true : false)}
       style={getPostCardStyle({
         position,
         color,

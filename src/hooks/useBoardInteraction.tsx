@@ -35,6 +35,7 @@ export const useBoadInteraction = () => {
   const onPostMouseDown = (id: string) => (e: React.MouseEvent) => {
     e.stopPropagation();
     onDragMode("POST");
+
     onSelect(id);
 
     const { offsetLeft, offsetTop } = postRef.init(e)(id) ?? {};
@@ -82,18 +83,16 @@ export const useBoadInteraction = () => {
     const type = dragMode();
 
     switch (type) {
-      case "POST": {
-        if (!selected) {
-          const el = e.target as HTMLElement;
-          onSelect(el?.id ?? el?.parentElement?.id);
-        }
-      }
+      case "POST":
       case "CANVAS":
         onSelect(null);
         break;
       case "NONE":
-        if (e.target === e.currentTarget) onSelect(null);
-        onSelect(null);
+        const el = e.target as HTMLElement;
+        if (el.id === "canvas") {
+          onSelect(null);
+        }
+
         break;
       default:
         throw new Error(`Unsupported drag mode : ${type}`);
