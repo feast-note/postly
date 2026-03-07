@@ -19,6 +19,7 @@ export default async function PinPage() {
   return (
     <BoardStateProvider>
       <Board />
+      <div id="portal"></div>
     </BoardStateProvider>
   );
 }

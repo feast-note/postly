@@ -4,11 +4,11 @@ import Img from "./Img";
 import { BoardPost } from "@/model/post";
 import { usePostPosition } from "@/context/PositionContext";
 import PostContentForm from "./PostContentForm";
-import CloseButton from "./CloseButton";
-import { useSelect } from "@/context/SelectContext";
+import PostControls from "./PostControls";
 
 type Props = {
   onMouseDown: (e: React.MouseEvent<Element, MouseEvent>) => void;
+  selected?: boolean;
 } & BoardPost;
 
 export type PostCardRef = {
@@ -23,22 +23,12 @@ export type PostCardRef = {
 };
 
 const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
-  {
-    id,
-    zIndex,
-    content,
-    color,
-    onMouseDown,
-    image,
-    width,
-    height,
-    position,
-  }: Props,
+  { position, selected = false, onMouseDown, ...props }: Props,
   ref,
 ) {
+  const { id, width, height, content, color, zIndex, image } = props;
   const targetRef = useRef<HTMLElement>(null);
   const { updatePosition } = usePostPosition();
-  const { selected } = useSelect();
 
   useImperativeHandle(ref, () => {
     return {
@@ -65,7 +55,7 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
   return (
     <article
       id={id}
-      className={getBasicStyle(selected === id ? true : false)}
+      className={getBasicStyle(selected)}
       style={getPostCardStyle({
         position,
         color,
@@ -76,9 +66,7 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
       ref={targetRef}
       onMouseDown={onMouseDown}
     >
-      <div className="text-right p-2">
-        <CloseButton id={id} />
-      </div>
+      <PostControls post={props} />
       <div className="p-2 flex-1 flex flex-col">
         {image && <Img image={image} />}
         <PostContentForm id={id} content={content} />
@@ -92,7 +80,7 @@ export default PostCard;
 function getBasicStyle(selected: boolean) {
   const selectStyle = selected ? "outline-2 outline-blue-700" : "";
 
-  return `flex flex-col rounded-md absolute shadow-lg cursor-grab active:cursor-grabbing ${selectStyle}`;
+  return `flex flex-col rounded-md absolute shadow-lg cursor-grab active:cursor-grabbing ${selectStyle} group`;
 }
 
 function getPostCardStyle({

@@ -12,16 +12,20 @@ export default function Navbar() {
       <Link href="/">
         <h2 className="font-semibold text-lg">Postly</h2>
       </Link>
-      {session ? (
-        <div className="flex gap-2">
-          <Button value="logout" onClick={() => signOut()} />
-          <Link href="/pin">
-            <Button value="Go to Board" />
-          </Link>
-        </div>
-      ) : (
-        <Button value="login" onClick={() => signIn()} />
-      )}
+      <div className="flex gap-2">
+        {session ? (
+          <>
+            <Button value="logout" onClick={() => signOut()} />
+            <Link href="/pin">
+              <Button value="Go to Board" />
+            </Link>
+          </>
+        ) : (
+          <>
+            <Button value="login" onClick={() => signIn()} />
+          </>
+        )}
+      </div>
     </div>
   );
 }

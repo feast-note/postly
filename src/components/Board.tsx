@@ -1,6 +1,5 @@
 "use client";
 
-import PostSetting from "./PostSetting";
 import Canvas from "./Canvas";
 import ToolBar from "./ToolBar";
 import PostCards from "./PostCards";
@@ -17,7 +16,6 @@ export default function Board() {
       className={`w-screen h-full overflow-hidden bg-[#333]`}
       {...handlers}
     >
-      <PostSetting />
       <ToolBar />
       <Canvas>
         {posts && (

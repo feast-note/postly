@@ -27,16 +27,16 @@ export async function addPost(): Promise<Post> {
   }).then((res) => res.json());
 }
 
-export async function modifyPostContent({
+export async function modifyPost({
   id,
-  content,
+  post,
 }: {
   id: string;
-  content: string;
+  post: Partial<Omit<Post, "id">>;
 }) {
   return fetch(`/api/content`, {
     method: "PUT",
-    body: JSON.stringify({ id, post: { content } }),
+    body: JSON.stringify({ id, post }),
   }).then((res) => res.json());
 }
 

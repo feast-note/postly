@@ -2,7 +2,6 @@ import { addUser } from "@/service/user";
 import NextAuth, { AuthOptions } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
-import { SiLinuxprofessionalinstitute } from "react-icons/si";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -48,3 +47,13 @@ export const authOptions: AuthOptions = {
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
+function CredentialsProvider(arg0: {
+  name: string;
+  credentials: {};
+  authorize(
+    credentials: any,
+    req: any,
+  ): Promise<{ id: any; name: string; role: string }>;
+}): import("next-auth/providers/index").Provider {
+  throw new Error("Function not implemented.");
+}

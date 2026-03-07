@@ -1,5 +1,5 @@
 "use client";
-import { addPost, deletePost, getPosts, modifyPostContent } from "@/api/post";
+import { addPost, deletePost, getPosts, modifyPost } from "@/api/post";
 import { usePostPosition } from "@/context/PositionContext";
 import { Post } from "@/model/post";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -34,10 +34,12 @@ export const usePostData = () => {
   });
 
   const modiPostItem = useMutation({
-    mutationFn: modifyPostContent,
-    onSuccess: (data) => {
-      const modifyPost = { ...posts?.[data.id], content: data.content };
-      const newPosts = posts?.map((p) => (p.id === data.id ? modifyPost : p));
+    mutationFn: modifyPost,
+    onMutate: (variables) => {
+      const { id, post } = variables;
+      const postItem = posts?.find((p) => p.id === id);
+      const modifyPost = { ...postItem, ...post };
+      const newPosts = posts?.map((p) => (p.id === id ? modifyPost : p));
       queryClient.setQueryData(["posts"], newPosts);
     },
   });

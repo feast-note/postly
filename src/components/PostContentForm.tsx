@@ -26,7 +26,7 @@ export default function PostContentForm({ id, content }: Props) {
   useEffect(() => {
     const saveContent = () => {
       if (contentRef.current.length > 0) {
-        modiPostItem.mutate({ id, content: contentRef.current });
+        modiPostItem.mutate({ id, post: { content: contentRef.current } });
         contentRef.current = "";
         delLocalStorage();
       }
@@ -46,5 +46,6 @@ export default function PostContentForm({ id, content }: Props) {
       onChange={handleContent}
       onMouseDown={(e) => e.stopPropagation()}
     />
+    // <Editor content={content} />
   );
 }
