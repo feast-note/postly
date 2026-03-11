@@ -1,8 +1,8 @@
 import { Post } from "@/model/post";
-import { getPostsByUsername } from "@/service/post";
+import { getPostsByUserId } from "@/service/post";
 
-export async function getInitialPosts(username: string) {
-  return getPostsByUsername(username).then((res) => res);
+export async function getInitialPosts(id: string) {
+  return getPostsByUserId(id).then((res) => res);
 }
 export async function getPosts() {
   return fetch("/api/post")

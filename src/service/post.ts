@@ -1,12 +1,11 @@
 import { Post } from "@/model/post";
 import { client } from "./sanity";
 
-export async function getPostsByUsername(name: string): Promise<Array<Post>> {
+export async function getPostsByUserId(id: string): Promise<Array<Post>> {
   return client.fetch(
-    `*[_type=='post']{
+    `*[_type=='post'&& author->_id=="${id}"]{
       ...,
       'id':_id,
-      author => name =='${name}'
 } `,
   );
 }

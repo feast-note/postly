@@ -4,7 +4,7 @@ import { authOptions } from "../api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
 import BoardStateProvider from "@/components/BoardStateProvider";
-import { getPostsByUsername } from "@/service/post";
+import { getPostsByUserId } from "@/service/post";
 
 export const metadata: Metadata = {
   title: "studio",
@@ -17,7 +17,7 @@ export default async function PinPage() {
 
   if (!user) redirect("/");
 
-  const initialData = await getPostsByUsername(user.name);
+  const initialData = await getPostsByUserId(user.id);
 
   return (
     <BoardStateProvider>
