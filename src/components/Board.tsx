@@ -2,12 +2,18 @@
 
 import Canvas from "./Canvas";
 import ToolBar from "./ToolBar";
-import PostCards from "./PostCards";
 import { useBoadInteraction } from "@/hooks/useBoardInteraction";
 import { usePostData } from "@/hooks/usePostData";
+import { Post } from "@/model/post";
+import dynamic from "next/dynamic";
 
-export default function Board() {
-  const { posts } = usePostData();
+const PostCards = dynamic(() => import("./PostCards"), { ssr: false });
+
+type Props = {
+  initialData?: Post[];
+};
+export default function Board({ initialData }: Props) {
+  const { posts } = usePostData(initialData ?? []);
 
   const { refRegister, handlers, onPostMouseDown } = useBoadInteraction();
 

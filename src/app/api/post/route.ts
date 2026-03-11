@@ -23,14 +23,8 @@ export async function POST(request: Request) {
     return new Response("Authentication Error", { status: 401 });
   }
 
-  const { post } = await request.json();
-
-  const { width, height } = post as Post;
-
   return createPost({
     userId: user.id,
-    width,
-    height,
   }).then((res) => NextResponse.json(res));
 }
 
