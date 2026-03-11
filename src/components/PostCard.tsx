@@ -67,7 +67,7 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
       onMouseDown={onMouseDown}
     >
       <div className="flex flex-col flex-1 relative">
-        <PostControls post={{ ...props, color }} />
+        <PostControls post={{ ...props, color, position }} />
         <PostContentForm id={id} content={content} />
 
         {selected && <Resizer onResize={handleResizeStart} />}

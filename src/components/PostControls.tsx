@@ -3,8 +3,9 @@ import { BoardPost } from "@/model/post";
 import { usePostData } from "@/hooks/usePostData";
 import { useDropdown } from "@/hooks/useDropdown";
 import ColorButton from "./ColorButton";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { usePost } from "@/context/PostContext";
+import ModalPortal from "./ModalPortal";
 
 const colorList = [
   { color: "#a5f3fc", title: "light-cyan" },
@@ -26,6 +27,7 @@ const colorList = [
 ];
 
 const PostColor = ({ post }: Props) => {
+  const containerRef = useRef(null);
   const { open, targetRef, onOpen } = useDropdown<HTMLDivElement>();
   const { updateState } = usePost();
   const [color, setColor] = useState(post.color);
@@ -35,37 +37,42 @@ const PostColor = ({ post }: Props) => {
     updateState(post.id, { color });
   };
 
+  const { position } = post;
+  console.log("po", position);
+
   return (
-    <>
+    <div id="tooltip-layer">
       <ColorButton onClick={() => onOpen(true)} />
       {open && (
-        <div
-          ref={targetRef}
-          className="absolute -top-56 -right-36 bg-white p-2 w-44 rounded-md z-50"
-        >
-          <h3 className="text-center font-semibold mb-3">배경 색상</h3>
-          <ul className="flex flex-col gap-1">
-            {colorList.map((item) => (
-              <li
-                key={item.color}
-                className={`flex gap-2 items-center hover:bg-gray-100 ${color === item.color && "bg-purple-100"}`}
-                onClick={() => handleColor(item.color)}
-              >
-                <div
-                  className="border border-gray-200 rounded-sm"
-                  style={{
-                    background: item.color,
-                    width: "23px",
-                    height: "23px",
-                  }}
-                />
-                <p className="text-md text-gray-600">{item.title}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <ModalPortal target={post.id}>
+          <div
+            ref={targetRef}
+            className="absolute -right-45 bg-white p-2 w-44 rounded-md cursor-pointer z-50"
+          >
+            <h3 className="text-center font-semibold mb-3">배경 색상</h3>
+            <ul className="flex flex-col gap-1">
+              {colorList.map((item) => (
+                <li
+                  key={item.color}
+                  className={`flex gap-2 items-center hover:bg-gray-100 ${color === item.color && "bg-purple-100"}`}
+                  onClick={() => handleColor(item.color)}
+                >
+                  <div
+                    className="border border-gray-200 rounded-sm"
+                    style={{
+                      background: item.color,
+                      width: "23px",
+                      height: "23px",
+                    }}
+                  />
+                  <p className="text-md text-gray-600">{item.title}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </ModalPortal>
       )}
-    </>
+    </div>
   );
 };
 

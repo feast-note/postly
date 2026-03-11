@@ -16,14 +16,6 @@ export async function addPost(): Promise<Post> {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      post: {
-        width: 360,
-        height: 360,
-        color: "rgb(255, 210, 48)",
-        zIndex: 1,
-      },
-    }),
   }).then((res) => res.json());
 }
 

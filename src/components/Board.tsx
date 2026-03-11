@@ -19,7 +19,7 @@ export default function Board({ initialData }: Props) {
 
   return (
     <section
-      className={`w-screen h-full overflow-hidden bg-[#333]`}
+      className={`relative w-screen h-full overflow-hidden bg-[#333]`}
       {...handlers}
     >
       <ToolBar />

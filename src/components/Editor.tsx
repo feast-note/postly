@@ -41,7 +41,7 @@ export default function Editor({ id, content }: Props) {
 
   return (
     <EditorContext.Provider value={{ editor }}>
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col cursor-text">
         <EditorContent
           editor={editor}
           className="flex flex-1 pt-4 px-2"
