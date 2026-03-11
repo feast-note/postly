@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useState } from "react";
+import {
+  createContext,
+  useContext,
+  ReactNode,
+  useState,
+  useCallback,
+} from "react";
 
 interface SelectContextType {
   selected: string | null;
@@ -14,7 +20,9 @@ const SelectModeContext = createContext<SelectContextType | null>({
 
 export function SelectProvider({ children }: { children: ReactNode }) {
   const [selected, setSelected] = useState<string | null>(null);
-  const onSelect = (id: string | null) => setSelected(id);
+  const onSelect = useCallback((id: string | null) => {
+    setSelected(id);
+  }, []);
 
   return (
     <SelectModeContext.Provider value={{ selected, onSelect }}>

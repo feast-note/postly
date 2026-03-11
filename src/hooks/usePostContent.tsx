@@ -17,12 +17,5 @@ export const usePostContent = (id: string) => {
     [id, setValue],
   );
 
-  const delLocalStorage = useCallback(() => {
-    setValue((prev) => {
-      const { [id]: _, ...rest } = prev;
-      return rest;
-    });
-  }, [id, setValue]);
-
-  return { state: storeContent, setLocalStorage, delLocalStorage };
+  return { state: storeContent, setLocalStorage };
 };

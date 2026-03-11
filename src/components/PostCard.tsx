@@ -1,15 +1,16 @@
 "use client";
-import { forwardRef, useImperativeHandle, useRef } from "react";
-import Img from "./Img";
-import { BoardPost } from "@/model/post";
-import { usePostPosition } from "@/context/PositionContext";
+import { forwardRef, useImperativeHandle } from "react";
+import { BoardPost, Post } from "@/model/post";
+import { usePost } from "@/context/PostContext";
 import PostContentForm from "./PostContentForm";
 import PostControls from "./PostControls";
+import { useSelect } from "@/context/SelectContext";
+import { useResize } from "@/hooks/useResize";
+import Resizer from "./Resizer";
 
 type Props = {
   onMouseDown: (e: React.MouseEvent<Element, MouseEvent>) => void;
-  selected?: boolean;
-} & BoardPost;
+} & Post;
 
 export type PostCardRef = {
   node: HTMLElement | null;
@@ -23,12 +24,17 @@ export type PostCardRef = {
 };
 
 const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
-  { position, selected = false, onMouseDown, ...props }: Props,
+  { onMouseDown, ...props }: Props,
   ref,
 ) {
-  const { id, width, height, content, color, zIndex, image } = props;
-  const targetRef = useRef<HTMLElement>(null);
-  const { updatePosition } = usePostPosition();
+  const { id, content } = props;
+
+  const { updatePosition, postState } = usePost();
+  const { position, size, color } = postState?.[id] ?? {};
+
+  const { targetRef, handleResizeStart } = useResize(id);
+
+  const { selected } = useSelect();
 
   useImperativeHandle(ref, () => {
     return {
@@ -50,26 +56,21 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
       },
       node: targetRef.current,
     };
-  }, [id, updatePosition]);
+  }, [id, targetRef, updatePosition]);
 
   return (
     <article
       id={id}
-      className={getBasicStyle(selected)}
-      style={getPostCardStyle({
-        position,
-        color,
-        width,
-        height,
-        zIndex,
-      })}
+      className={getBasicStyle(id === selected)}
+      style={getPostCardStyle({ ...props, position, color, ...size })}
       ref={targetRef}
       onMouseDown={onMouseDown}
     >
-      <PostControls post={props} />
-      <div className="p-2 flex-1 flex flex-col">
-        {image && <Img image={image} />}
+      <div className="flex flex-col flex-1 relative">
+        <PostControls post={{ ...props, color }} />
         <PostContentForm id={id} content={content} />
+
+        {selected && <Resizer onResize={handleResizeStart} />}
       </div>
     </article>
   );
@@ -80,25 +81,22 @@ export default PostCard;
 function getBasicStyle(selected: boolean) {
   const selectStyle = selected ? "outline-2 outline-blue-700" : "";
 
-  return `flex flex-col rounded-md absolute shadow-lg cursor-grab active:cursor-grabbing ${selectStyle} group`;
+  return `flex flex-col absolute cursor-grabbing shadow-lg ${selectStyle}`;
 }
 
-function getPostCardStyle({
-  position,
-  color,
-  width,
-  height,
-  zIndex,
-}: Partial<
-  Pick<BoardPost, "color" | "position" | "width" | "height" | "zIndex">
->) {
+function getPostCardStyle(
+  post: Partial<
+    Pick<BoardPost, "color" | "position" | "zIndex" | "width" | "height">
+  >,
+) {
+  const { position, color, width, height, zIndex } = post ?? {};
+
   return {
     left: `${position?.x ?? 0}px`,
     top: `${position?.y ?? 0}px`,
-    background: color,
-    width: `${width ?? 240}px`,
-    minHeight: `${height ?? 240}px`,
-    height: `auto`,
+    background: color || "#FFDE21",
+    width: `${width ?? 360}px`,
+    height: `${height ?? 360}px`,
     zIndex,
   };
 }

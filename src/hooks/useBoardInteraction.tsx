@@ -25,6 +25,7 @@ export const useBoadInteraction = () => {
   });
 
   const onCanvasMouseDown = (e: React.MouseEvent) => {
+    if (selected) onSelect(null);
     onDragMode("CANVAS");
     dragStart.current.mouseX = e.clientX;
     dragStart.current.mouseY = e.clientY;

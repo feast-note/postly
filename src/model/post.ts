@@ -2,17 +2,23 @@ export type Post = {
   id: string;
   content?: string;
   zIndex: number;
-  color: string;
-  image?: string;
+};
+
+export type Position = {
+  x?: number;
+  y?: number;
+};
+
+export type Size = {
   width?: number;
   height?: number;
 };
 
-export type Position = {
-  x: number;
-  y: number;
+export type Color = {
+  color?: string;
 };
 
 export type BoardPost = Post & {
   position?: Position;
-};
+} & Size &
+  Color;

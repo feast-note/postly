@@ -1,21 +1,69 @@
-import { useState } from "react";
 import CloseButton from "./CloseButton";
-import EditButton from "./EditButton";
-import ModalPortal from "./ModalPortal";
-import PostModal from "./PostModal";
-import { Post } from "@/model/post";
+import { BoardPost } from "@/model/post";
 import { usePostData } from "@/hooks/usePostData";
+import { useDropdown } from "@/hooks/useDropdown";
+import ColorButton from "./ColorButton";
+import { useState } from "react";
+import { usePost } from "@/context/PostContext";
 
-const PostEdit = ({ post }: Props) => {
-  const [edit, setEdit] = useState(false);
-  const onEdit = (v: boolean) => setEdit(v);
+const colorList = [
+  { color: "#a5f3fc", title: "light-cyan" },
+  { color: "#06b6d4", title: "cyan" },
+  { color: "#bfdbfe", title: "light-blue" },
+  { color: "#0ea5e9", title: "blue" },
+  { color: "#e9d5ff", title: "light-purple" },
+  { color: "#8b5cf6", title: "purple" },
+  { color: "#ffedd5", title: "light-orange" },
+  { color: "#f97316", title: "orange" },
+  { color: "#fbcfe8", title: "light-pink" },
+  { color: "#ec4899", title: "pink" },
+  { color: "#fecaca", title: "light-red" },
+  { color: "#ef4444", title: "red" },
+  { color: "#fef08a", title: "light-yellow" },
+  { color: "#fde047", title: "yellow" },
+  { color: "#bbf7d0", title: "light-green" },
+  { color: "#22c55e", title: "green" },
+];
+
+const PostColor = ({ post }: Props) => {
+  const { open, targetRef, onOpen } = useDropdown<HTMLDivElement>();
+  const { updateState } = usePost();
+  const [color, setColor] = useState(post.color);
+
+  const handleColor = (color: string) => {
+    setColor(color);
+    updateState(post.id, { color });
+  };
+
   return (
     <>
-      <EditButton onClick={() => onEdit(true)} />
-      {edit && (
-        <ModalPortal>
-          <PostModal onClose={() => setEdit(false)} post={post} />
-        </ModalPortal>
+      <ColorButton onClick={() => onOpen(true)} />
+      {open && (
+        <div
+          ref={targetRef}
+          className="absolute -top-56 -right-36 bg-white p-2 w-44 rounded-md z-50"
+        >
+          <h3 className="text-center font-semibold mb-3">배경 색상</h3>
+          <ul className="flex flex-col gap-1">
+            {colorList.map((item) => (
+              <li
+                key={item.color}
+                className={`flex gap-2 items-center hover:bg-gray-100 ${color === item.color && "bg-purple-100"}`}
+                onClick={() => handleColor(item.color)}
+              >
+                <div
+                  className="border border-gray-200 rounded-sm"
+                  style={{
+                    background: item.color,
+                    width: "23px",
+                    height: "23px",
+                  }}
+                />
+                <p className="text-md text-gray-600">{item.title}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </>
   );
@@ -31,12 +79,12 @@ const PostClose = ({ post }: Props) => {
 };
 
 type Props = {
-  post: Post;
+  post: BoardPost;
 };
 export default function PostControls({ post }: Props) {
   return (
-    <div className="flex justify-end text-right p-2 gap-1">
-      <PostEdit post={post} />
+    <div className="flex justify-end text-right p-2 gap-1 w-full">
+      <PostColor post={post} />
       <PostClose post={post} />
     </div>
   );

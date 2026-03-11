@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import BindProvider from "./BindProvider";
 import { TransformProvider } from "@/context/TransformContext";
-import { PositionProvider } from "@/context/PositionContext";
+import { PostProvider } from "@/context/PostContext";
 import { SelectProvider } from "@/context/SelectContext";
 
 type Props = {
@@ -9,9 +9,7 @@ type Props = {
 };
 export default function BoardStateProvider({ children }: Props) {
   return (
-    <BindProvider
-      providers={[PositionProvider, TransformProvider, SelectProvider]}
-    >
+    <BindProvider providers={[PostProvider, TransformProvider, SelectProvider]}>
       {children}
     </BindProvider>
   );
