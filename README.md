@@ -24,5 +24,9 @@
 - 카드 추가 메뉴 구현 : 단순 텍스트를 넘어, 사용자의 목적에 맞는 다양한 형태(자유로운 크기 조절, 이미지 업로드 전용 카드, 순수 텍스트 카드 등)의 멀티미디어 카드 타입 확장 예정
 
 
-[![]](https://github.com/user-attachments/assets/dcb125b6-d01e-46fb-b034-b404f9611de7)
+[![]](https://github.com/user-attachments/assets/ca75a2f6-c29f-4ad1-8976-f13b2a997627)
+
+
+
+
 
