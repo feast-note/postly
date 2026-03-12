@@ -1,11 +1,12 @@
 "use client";
 import { useDropdown } from "@/hooks/useDropdown";
 import { usePostData } from "@/hooks/usePostData";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { BsCheck } from "react-icons/bs";
 import { FcEditImage } from "react-icons/fc";
 import { IoSquare } from "react-icons/io5";
 import { MdKeyboardArrowDown, MdOutlinePostAdd } from "react-icons/md";
+import { toast } from "react-toastify";
 
 type PostType = "simple-card" | "image-card";
 
@@ -33,6 +34,12 @@ export default function AddPost() {
     onOpen(false);
     addPostItem.mutate();
   };
+
+  useEffect(() => {
+    toast(addPostItem.error?.message, {
+      type: "error",
+    });
+  }, [addPostItem.error]);
 
   return (
     <>
