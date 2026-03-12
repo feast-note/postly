@@ -9,7 +9,7 @@ export default function Resizer({ onResize }: Props) {
       <>
         {/* 변 (Edges) */}
         <div
-          className="absolute cursor-nwse-resize p-2 z-50"
+          className={`absolute cursor-nwse-resize p-2 z-50`}
           onMouseDown={(e) => onResize(e, "nw")}
         />
         <div
@@ -27,19 +27,19 @@ export default function Resizer({ onResize }: Props) {
 
         {/* 모서리 (Corners) */}
         <div
-          className="absolute p-2 cursor-n-resize w-full"
+          className="absolute p-2 cursor-ns-resize w-full"
           onMouseDown={(e) => onResize(e, "n")}
         />
         <div
-          className="absolute left-0 p-2 cursor-w-resize h-full"
+          className="absolute left-0 p-2 cursor-ew-resize h-full"
           onMouseDown={(e) => onResize(e, "w")}
         />
         <div
-          className="absolute right-0 p-2 cursor-e-resize h-full"
+          className="absolute right-0 p-2 cursor-ew-resize h-full"
           onMouseDown={(e) => onResize(e, "e")}
         />
         <div
-          className="absolute bottom-0 p-2 cursor-s-resize w-full"
+          className="absolute bottom-0 p-2 cursor-ns-resize w-full"
           onMouseDown={(e) => onResize(e, "s")}
         />
       </>

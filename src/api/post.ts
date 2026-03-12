@@ -10,13 +10,24 @@ export async function getPosts() {
     .catch((error) => error);
 }
 
-export async function addPost(): Promise<Post> {
+export async function addPost(posts?: Post[]): Promise<Post> {
   return fetch("/api/post", {
     method: "post",
     headers: {
       "Content-Type": "application/json",
     },
-  }).then((res) => res.json());
+    body: JSON.stringify({ posts }),
+  })
+    .then(async (res) => {
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message);
+      }
+      return res.json();
+    })
+    .catch((error) => {
+      throw error;
+    });
 }
 
 export async function modifyPost({

@@ -1,6 +1,6 @@
 "use client";
 import { forwardRef, useImperativeHandle } from "react";
-import { BoardPost, Post } from "@/model/post";
+import { LocalPost, Post } from "@/model/post";
 import { usePost } from "@/context/PostContext";
 import PostContentForm from "./PostContentForm";
 import PostControls from "./PostControls";
@@ -30,11 +30,11 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
   const { id, content } = props;
 
   const { updatePosition, postState } = usePost();
-  const { position, size, color } = postState?.[id] ?? {};
 
   const { targetRef, handleResizeStart } = useResize(id);
 
   const { selected } = useSelect();
+  const isSelected = id === selected;
 
   useImperativeHandle(ref, () => {
     return {
@@ -61,13 +61,13 @@ const PostCard = forwardRef<PostCardRef, Props>(function PostCard(
   return (
     <article
       id={id}
-      className={getBasicStyle(id === selected)}
-      style={getPostCardStyle({ ...props, position, color, ...size })}
+      className={getBasicStyle(isSelected)}
+      style={getPostCardStyle(postState?.[id], isSelected)}
       ref={targetRef}
       onMouseDown={onMouseDown}
     >
       <div className="flex flex-col flex-1 relative">
-        <PostControls post={{ ...props, color, position }} />
+        <PostControls id={id} post={postState?.[id]} />
         <PostContentForm id={id} content={content} />
 
         {selected && <Resizer onResize={handleResizeStart} />}
@@ -84,19 +84,17 @@ function getBasicStyle(selected: boolean) {
   return `flex flex-col absolute cursor-grabbing shadow-lg ${selectStyle}`;
 }
 
-function getPostCardStyle(
-  post: Partial<
-    Pick<BoardPost, "color" | "position" | "zIndex" | "width" | "height">
-  >,
-) {
-  const { position, color, width, height, zIndex } = post ?? {};
+function getPostCardStyle(post?: LocalPost, isSelected: boolean = false) {
+  const { position, color, size } = post ?? {};
+  const { x, y } = position ?? {};
+  const { width, height } = size ?? {};
 
   return {
-    left: `${position?.x ?? 0}px`,
-    top: `${position?.y ?? 0}px`,
+    left: `${x ?? 0}px`,
+    top: `${y ?? 0}px`,
     background: color || "#FFDE21",
     width: `${width ?? 360}px`,
     height: `${height ?? 360}px`,
-    zIndex,
+    zIndex: `${isSelected ? "2" : "1"}`,
   };
 }

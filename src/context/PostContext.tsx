@@ -1,6 +1,7 @@
 "use client";
 import { useDebouncedEffect } from "@/hooks/useDebouncedEffect";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { LocalPost } from "@/model/post";
 import {
   createContext,
   useCallback,
@@ -9,19 +10,13 @@ import {
   useState,
 } from "react";
 
-type PostStateObj = {
-  position?: { x?: number; y?: number };
-  size?: { width?: number; height?: number };
-  color?: string;
-};
-
-type PostState = Record<string, PostStateObj>;
+type PostState = Record<string, LocalPost>;
 
 const PostContext = createContext<{
   postState?: PostState;
   updatePosition: (id: string, x: number, y: number) => void;
   removePost: (id: string) => void;
-  updateState: (id: string, updates: PostStateObj) => void;
+  updateState: (id: string, updates: LocalPost) => void;
 }>({
   updatePosition: () => () => {},
   removePost: () => {},
@@ -53,7 +48,7 @@ export function PostProvider({ children }: Props) {
     [saveTrigger],
   );
 
-  const updateState = useCallback((id: string, updates: PostStateObj) => {
+  const updateState = useCallback((id: string, updates: LocalPost) => {
     setPostState((prev) => {
       const prevItem = prev[id] || {
         position: { x: 0, y: 0 },

@@ -26,7 +26,7 @@ export const usePostData = (initialData?: Post[]) => {
   });
 
   const addPostItem = useMutation({
-    mutationFn: addPost,
+    mutationFn: () => addPost(posts),
     onSuccess: (data) => {
       updatePosition(
         data.id,
@@ -40,7 +40,7 @@ export const usePostData = (initialData?: Post[]) => {
 
   const modiPostItem = useMutation({
     mutationFn: modifyPost,
-    onMutate: (variables) => {
+    onSuccess: (data, variables) => {
       const { id, post } = variables;
       const postItem = posts?.find((p) => p.id === id);
       const modifyPost = { ...postItem, ...post };
@@ -51,7 +51,7 @@ export const usePostData = (initialData?: Post[]) => {
 
   const delPostItem = useMutation({
     mutationFn: deletePost,
-    onMutate(variables) {
+    onSuccess(data, variables) {
       removePost(variables);
       const newPosts = posts?.filter((p) => p.id !== variables);
       queryClient.setQueryData(["posts", user?.id], newPosts);
