@@ -130,6 +130,5 @@ export const useBoadInteraction = () => {
       onWheel: onScale,
     },
     onPostMouseDown,
-    onStop,
   };
 };

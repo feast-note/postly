@@ -18,7 +18,6 @@ export type Color = {
   color?: string;
 };
 
-export type BoardPost = Post & {
-  position?: Position;
-} & Size &
-  Color;
+export type LocalPost = { position?: Position; size?: Size } & Color;
+
+export type BoardPost = Post & LocalPost;

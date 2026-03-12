@@ -1,9 +1,9 @@
 import CloseButton from "./CloseButton";
-import { BoardPost } from "@/model/post";
+import { LocalPost } from "@/model/post";
 import { usePostData } from "@/hooks/usePostData";
 import { useDropdown } from "@/hooks/useDropdown";
 import ColorButton from "./ColorButton";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { usePost } from "@/context/PostContext";
 import ModalPortal from "./ModalPortal";
 
@@ -26,25 +26,21 @@ const colorList = [
   { color: "#22c55e", title: "green" },
 ];
 
-const PostColor = ({ post }: Props) => {
-  const containerRef = useRef(null);
+const PostColor = ({ id, post }: Props) => {
   const { open, targetRef, onOpen } = useDropdown<HTMLDivElement>();
   const { updateState } = usePost();
-  const [color, setColor] = useState(post.color);
+  const [color, setColor] = useState(post?.color);
 
   const handleColor = (color: string) => {
     setColor(color);
-    updateState(post.id, { color });
+    updateState(id, { color });
   };
 
-  const { position } = post;
-  console.log("po", position);
-
   return (
-    <div id="tooltip-layer">
+    <>
       <ColorButton onClick={() => onOpen(true)} />
       {open && (
-        <ModalPortal target={post.id}>
+        <ModalPortal target={id}>
           <div
             ref={targetRef}
             className="absolute -right-45 bg-white p-2 w-44 rounded-md cursor-pointer z-50"
@@ -72,27 +68,28 @@ const PostColor = ({ post }: Props) => {
           </div>
         </ModalPortal>
       )}
-    </div>
+    </>
   );
 };
 
-const PostClose = ({ post }: Props) => {
+const PostClose = ({ id }: { id: string }) => {
   const { delPostItem } = usePostData();
 
   const handleDelete = () => {
-    delPostItem.mutate(post.id);
+    delPostItem.mutate(id);
   };
   return <CloseButton onClick={handleDelete} />;
 };
 
 type Props = {
-  post: BoardPost;
+  id: string;
+  post?: LocalPost;
 };
-export default function PostControls({ post }: Props) {
+export default function PostControls({ id, post }: Props) {
   return (
     <div className="flex justify-end text-right p-2 gap-1 w-full">
-      <PostColor post={post} />
-      <PostClose post={post} />
+      <PostColor id={id} post={post} />
+      <PostClose id={id} />
     </div>
   );
 }
