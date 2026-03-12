@@ -24,7 +24,7 @@ export async function POST(request: Request) {
 
   const { posts } = await request.json();
 
-  if (posts && posts.length < 1000) {
+  if (posts && posts.length >= 1000) {
     return NextResponse.json(
       { message: "You can create up to 100 posts." },
       {
