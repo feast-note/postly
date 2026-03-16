@@ -1,12 +1,13 @@
 "use client";
 
-import { PostCardRef } from "@/components/PostCard";
 import { useRef } from "react";
+import { usePost } from "@/context/PostContext";
 
 export const usePostcardInteraction = () => {
-  const postsRef = useRef<Map<string, PostCardRef>>(new Map());
+  const postsRef = useRef<Map<string, HTMLElement>>(new Map());
+  const { updatePosition } = usePost();
 
-  const onRef = (id: string) => (el: PostCardRef) => {
+  const onRef = (id: string) => (el: HTMLElement) => {
     if (el) {
       postsRef.current.set(id, el);
     } else {
@@ -14,14 +15,9 @@ export const usePostcardInteraction = () => {
     }
   };
 
-  const getSelectedRef = (id: string) => postsRef.current.get(id);
-
   const postRef = {
-    register: (id: string) => (el: PostCardRef) => onRef(id)(el),
-    move: (x: number, y: number) => (id: string) =>
-      getSelectedRef(id)?.setPosition(x, y),
-    init: (e: React.MouseEvent) => (id: string) =>
-      getSelectedRef(id)?.getInitialPosition(e) ?? undefined,
+    register: (id: string) => (el: HTMLElement) => onRef(id)(el),
+    move: (x: number, y: number) => (id: string) => updatePosition(id, x, y),
   };
 
   return { postRef };

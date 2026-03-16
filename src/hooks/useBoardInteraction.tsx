@@ -33,19 +33,18 @@ export const useBoadInteraction = () => {
     dragStart.current.canvasY = position.y;
   };
 
-  const onPostMouseDown = (id: string) => (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDragMode("POST");
+  const onPostMouseDown =
+    (id: string, x: number, y: number) => (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onDragMode("POST");
 
-    onSelect(id);
+      onSelect(id);
 
-    const { offsetLeft, offsetTop } = postRef.init(e)(id) ?? {};
-
-    dragStart.current.mouseX = e.clientX;
-    dragStart.current.mouseY = e.clientY;
-    dragStart.current.postLeft = offsetLeft ?? 0;
-    dragStart.current.postTop = offsetTop ?? 0;
-  };
+      dragStart.current.mouseX = e.clientX;
+      dragStart.current.mouseY = e.clientY;
+      dragStart.current.postLeft = x ?? 0;
+      dragStart.current.postTop = y ?? 0;
+    };
 
   const onMouseMove = (e: React.MouseEvent) => {
     const type = dragMode();
