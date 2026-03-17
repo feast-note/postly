@@ -1,12 +1,13 @@
 import { usePost } from "@/context/PostContext";
 import { useCallback, useRef } from "react";
-import { useScale } from "./useScale";
+import { useScale } from "./scale";
+import { Position, Size } from "@/model/post";
 
 export type ResizeDirection = "n" | "s" | "w" | "e" | "nw" | "ne" | "se" | "sw";
 export const minWidth = 360;
 export const minHeight = 360;
 
-export const useResize = (id: string) => {
+export const useResize = (id: string, position?: Position, size?: Size) => {
   const targetRef = useRef<HTMLElement>(null);
   const { updateState } = usePost();
   const { scale } = useScale();
@@ -19,10 +20,11 @@ export const useResize = (id: string) => {
 
       const startX = e.clientX;
       const startY = e.clientY;
-      const startW = targetRef.current.offsetWidth;
-      const startH = targetRef.current.offsetHeight;
-      const startL = targetRef.current.offsetLeft;
-      const startT = targetRef.current.offsetTop;
+
+      const startW = size?.width ?? 360;
+      const startH = size?.height ?? 360;
+      const startL = position?.x ?? 0;
+      const startT = position?.y ?? 0;
 
       let width,
         height,
@@ -38,7 +40,6 @@ export const useResize = (id: string) => {
         if (direction.includes("e")) {
           width = startW + deltaX < minWidth ? minWidth : startW + deltaX;
 
-          targetRef.current.style.width = `${width}px`;
           updateState(id, { size: { width } });
         }
         // 서쪽(왼쪽)으로 늘리기: 위치(left)도 이동해야 함
@@ -51,9 +52,6 @@ export const useResize = (id: string) => {
             left = startL + (startW - minWidth);
           }
 
-          targetRef.current.style.width = `${width}px`;
-          targetRef.current.style.left = `${left}px`;
-
           updateState(id, {
             position: { x: left },
             size: { width: width },
@@ -61,9 +59,10 @@ export const useResize = (id: string) => {
         }
         // 남쪽(아래)으로 늘리기
         if (direction.includes("s")) {
-          height = startH + deltaY < minHeight ? minHeight : startH + deltaY;
-
-          targetRef.current.style.height = `${height}px`;
+          height = startH + deltaY;
+          if (height <= minHeight) {
+            height = minHeight;
+          }
 
           updateState(id, { size: { height } });
         }
@@ -76,9 +75,6 @@ export const useResize = (id: string) => {
             height = minHeight;
             top = startT + (startH - minHeight);
           }
-
-          targetRef.current.style.top = `${top}px`;
-          targetRef.current.style.height = `${height}px`;
 
           updateState(id, { position: { y: top }, size: { height } });
         }
@@ -94,7 +90,7 @@ export const useResize = (id: string) => {
       document.addEventListener("mousemove", onMouseMove);
       document.addEventListener("mouseup", onMouseUp);
     },
-    [id, scale, updateState],
+    [id, scale, position, updateState, size],
   );
 
   return { targetRef, handleResizeStart };

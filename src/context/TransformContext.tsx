@@ -1,7 +1,7 @@
 "use client";
 
-import { usePosition } from "@/hooks/usePosition";
-import { useScale } from "@/hooks/useScale";
+import { usePosition } from "@/hooks/position";
+import { useScale } from "@/hooks/scale";
 import { createContext, useContext } from "react";
 
 const TransformContext = createContext<{

@@ -1,4 +1,4 @@
-import { ResizeDirection } from "@/hooks/useResize";
+import { ResizeDirection } from "@/hooks/resize";
 
 type Props = {
   onResize: (e: React.MouseEvent, direction: ResizeDirection) => void;

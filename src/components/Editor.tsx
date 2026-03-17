@@ -5,7 +5,7 @@ import StarterKit from "@tiptap/starter-kit";
 import { TextStyleKit, FontSize } from "@tiptap/extension-text-style";
 import { HeadingDropdownMenu } from "./tiptap-ui/heading-dropdown-menu";
 import { MarkButton } from "@/components/tiptap-ui/mark-button";
-import { usePostData } from "@/hooks/usePostData";
+import { usePostData } from "@/hooks/post-data";
 import { useSelect } from "@/context/SelectContext";
 import Heading from "@tiptap/extension-heading";
 

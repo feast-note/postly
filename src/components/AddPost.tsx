@@ -1,12 +1,13 @@
 "use client";
-import { useDropdown } from "@/hooks/useDropdown";
-import { usePostData } from "@/hooks/usePostData";
+import { useDropdown } from "@/hooks/dropdown";
+import { usePostData } from "@/hooks/post-data";
 import { ReactNode, useEffect, useState } from "react";
 import { BsCheck } from "react-icons/bs";
-import { FcEditImage } from "react-icons/fc";
+// import { FcEditImage } from "react-icons/fc";
 import { IoSquare } from "react-icons/io5";
 import { MdKeyboardArrowDown, MdOutlinePostAdd } from "react-icons/md";
 import { toast } from "react-toastify";
+import { usePathname } from "next/navigation";
 
 type PostType = "simple-card" | "image-card";
 
@@ -16,15 +17,17 @@ const addPostList: Array<{ icon: ReactNode; title: string; type: PostType }> = [
     title: "simple card",
     type: "simple-card",
   },
-  {
-    icon: <FcEditImage size={20} />,
-    title: "image card",
-    type: "image-card",
-  },
+  // TODO: image card 생성할 수 있도록 할건지 말건지 추후 기획할 예정
+  // {
+  //   icon: <FcEditImage size={20} />,
+  //   title: "image card",
+  //   type: "image-card",
+  // },
 ];
 
 export default function AddPost() {
   const { open, targetRef, onOpen } = useDropdown<HTMLDivElement>();
+
   const { addPostItem } = usePostData();
 
   const [postType, setPostType] = useState<PostType>("simple-card");

@@ -2,8 +2,8 @@
 
 import Canvas from "./Canvas";
 import ToolBar from "./ToolBar";
-import { useBoadInteraction } from "@/hooks/useBoardInteraction";
-import { usePostData } from "@/hooks/usePostData";
+import { useBoadInteraction } from "@/hooks/board-interaction";
+import { usePostData } from "@/hooks/post-data";
 import { Post } from "@/model/post";
 import dynamic from "next/dynamic";
 import { ToastContainer } from "react-toastify";

@@ -10,12 +10,19 @@ export async function getPostsByUserId(id: string): Promise<Array<Post>> {
   );
 }
 
+export async function getPostsByTest(): Promise<Array<Post>> {
+  return client.fetch(
+    `*[_type=='post'&& guestMode==true]{
+      ...,
+      'id':_id,
+} `,
+  );
+}
+
 export async function createPost({
   userId,
 }: {
-  userId: string;
-  width?: number;
-  height?: number;
+  userId?: string;
 }): Promise<Post> {
   return client
     .create({
@@ -25,6 +32,7 @@ export async function createPost({
         _ref: userId,
         _type: "reference",
       },
+      guestMode: userId ? false : true,
     })
     .then((res) => {
       return { ...res, id: res._id };
