@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef } from "react";
-import { usePostcardInteraction } from "./usePostcardInteraction";
+import { usePostcardInteraction } from "./post-interaction";
 import { useTransform } from "@/context/TransformContext";
-import { useDragMode } from "@/hooks/useDragMode";
+import { useDragMode } from "@/hooks/dragmode";
 import { useSelect } from "@/context/SelectContext";
 
 export type Drag = "NONE" | "CANVAS" | "POST";

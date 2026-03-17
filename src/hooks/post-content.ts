@@ -1,6 +1,6 @@
 "use client";
 import { useCallback } from "react";
-import { useLocalStorage } from "./useLocalStorage";
+import { useLocalStorage } from "./localstorage";
 
 export const usePostContent = (id: string) => {
   const { storedValue, setValue } =

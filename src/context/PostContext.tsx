@@ -1,6 +1,6 @@
 "use client";
-import { useDebouncedEffect } from "@/hooks/useDebouncedEffect";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useDebouncedEffect } from "@/hooks/debounce-effect";
+import { useLocalStorage } from "@/hooks/localstorage";
 import { LocalPost } from "@/model/post";
 import {
   createContext,
