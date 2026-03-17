@@ -48,31 +48,36 @@ export function PostProvider({ children }: Props) {
     [saveTrigger],
   );
 
-  const updateState = useCallback((id: string, updates: LocalPost) => {
-    setPostState((prev) => {
-      const prevItem = prev[id] || {
-        position: { x: 0, y: 0 },
-        size: { width: 360, height: 360 },
-        color: "#fef08a",
-      };
-      const next = {
-        ...prev,
-        [id]: {
-          position: {
-            ...prevItem.position,
-            ...updates.position,
+  const updateState = useCallback(
+    (id: string, updates: LocalPost) => {
+      setPostState((prev) => {
+        const prevItem = prev[id] || {
+          position: { x: 0, y: 0 },
+          size: { width: 360, height: 360 },
+          color: "#fef08a",
+        };
+
+        const next = {
+          ...prev,
+          [id]: {
+            position: {
+              ...prevItem.position,
+              ...updates.position,
+            },
+            size: {
+              ...prevItem.size,
+              ...updates.size,
+            },
+            color: updates.color || prevItem.color,
           },
-          size: {
-            ...prevItem.size,
-            ...updates.size,
-          },
-          color: updates.color || prevItem.color,
-        },
-      };
-      positionState.current = next;
-      return next;
-    });
-  }, []);
+        };
+        positionState.current = next;
+        if (!saveTrigger) setTrigger(true);
+        return next;
+      });
+    },
+    [saveTrigger],
+  );
 
   const removePost = useCallback(
     (id: string) =>
