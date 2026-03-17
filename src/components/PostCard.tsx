@@ -4,7 +4,7 @@ import { LocalPost, Post } from "@/model/post";
 import PostContentForm from "./PostContentForm";
 import PostControls from "./PostControls";
 import { useSelect } from "@/context/SelectContext";
-import { useResize } from "@/hooks/useResize";
+import { useResize } from "@/hooks/resize";
 import Resizer from "./Resizer";
 
 type Props = {
@@ -22,8 +22,6 @@ const PostCard = forwardRef<HTMLElement, Props>(function PostCard({
   ...props
 }: Props) {
   const { id, content } = props;
-
-  const { targetRef, handleResizeStart } = useResize(id);
 
   const { selected } = useSelect();
 
@@ -43,6 +41,12 @@ const PostCard = forwardRef<HTMLElement, Props>(function PostCard({
       backgroundColor: color,
     }),
     [color, height, width, x, y],
+  );
+
+  const { targetRef, handleResizeStart } = useResize(
+    id,
+    { x, y },
+    { width, height },
   );
 
   return (

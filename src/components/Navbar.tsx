@@ -13,6 +13,9 @@ export default function Navbar() {
         <h2 className="font-semibold text-lg">Postly</h2>
       </Link>
       <div className="flex gap-2">
+        <Link href="/test">
+          <Button value="test mode" />
+        </Link>
         {session ? (
           <>
             <Button value="logout" onClick={() => signOut()} />

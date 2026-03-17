@@ -1,7 +1,7 @@
 import CloseButton from "./CloseButton";
 import { LocalPost } from "@/model/post";
-import { usePostData } from "@/hooks/usePostData";
-import { useDropdown } from "@/hooks/useDropdown";
+import { usePostData } from "@/hooks/post-data";
+import { useDropdown } from "@/hooks/dropdown";
 import ColorButton from "./ColorButton";
 import { useState } from "react";
 import { usePost } from "@/context/PostContext";

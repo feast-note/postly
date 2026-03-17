@@ -4,14 +4,19 @@ import { getPostsByUserId } from "@/service/post";
 export async function getInitialPosts(id: string) {
   return getPostsByUserId(id).then((res) => res);
 }
-export async function getPosts() {
-  return fetch("/api/post")
+
+export async function getPosts(apiKey: string = "/api/post") {
+  console.log("api", apiKey);
+  return fetch(apiKey)
     .then((res) => res.json())
     .catch((error) => error);
 }
 
-export async function addPost(posts?: Post[]): Promise<Post> {
-  return fetch("/api/post", {
+export async function addPost(
+  posts?: Post[],
+  apiKey: string = "/api/post",
+): Promise<Post> {
+  return fetch(apiKey, {
     method: "post",
     headers: {
       "Content-Type": "application/json",
@@ -30,21 +35,18 @@ export async function addPost(posts?: Post[]): Promise<Post> {
     });
 }
 
-export async function modifyPost({
-  id,
-  post,
-}: {
-  id: string;
-  post: Partial<Omit<Post, "id">>;
-}) {
-  return fetch(`/api/content`, {
+export async function modifyPost(
+  { id, post }: { id: string; post: Partial<Omit<Post, "id">> },
+  apiKey?: string,
+) {
+  return fetch(apiKey ?? "/api/content", {
     method: "PUT",
     body: JSON.stringify({ id, post }),
   }).then((res) => res.json());
 }
 
-export async function deletePost(id: string) {
-  return fetch("/api/post", {
+export async function deletePost(id: string, apiKey: string = "/api/post") {
+  return fetch(apiKey, {
     method: "DELETE",
     body: JSON.stringify({ id }),
   }).then((res) => res.json());
