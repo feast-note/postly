@@ -18,10 +18,10 @@ export default function Navbar() {
         </Link>
         {session ? (
           <>
-            <Button value="logout" onClick={() => signOut()} />
             <Link href="/pin">
               <Button value="Go to Board" />
             </Link>
+            <Button value="logout" onClick={() => signOut()} />
           </>
         ) : (
           <>
